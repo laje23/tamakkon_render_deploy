@@ -1,4 +1,4 @@
-from balethon.objects import InlineKeyboard , InlineKeyboardButton , ReplyKeyboardRemove
+from balethon.objects import InlineKeyboard , InlineKeyboardButton , Message
 from  dotenv import load_dotenv
 from balethon import Client
 from models import hadith as db_hadith
