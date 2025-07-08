@@ -22,14 +22,27 @@ class DatabaseManagerNotes:
             );
         """)
 
-    def save_notes(self , message_id , id):
-        self.cursor.execute('INSERT INTO notes (id) , (message_id) VALUES (%s,%s)' , (id , message_id))
+    def save_notes(self, message_id, id):
+        self.cursor.execute(
+            'INSERT INTO notes (id, message_id) VALUES (%s, %s)',
+            (id, message_id))
+
 
     def mark_sent(self, final_id):
         self.cursor.execute(
             "UPDATE notes SET sent = 1 WHERE message_id = %s",
             (final_id,)
         )
+
+    def chek_id_exist(self , id ):
+        self.cursor.execute('SELECT id FROM notes WHERE id = %s ' ,(id,) )
+        _id = self.cursor.fetchone()
+        return _id[0] if _id else None
+
+    def select_messageid_by_id(self , id):
+        self.cursor.execute('SELECT message_id FROM notes WHERE id = %s ', (id,))
+        _id = self.cursor.fetchone()
+        return _id[0] if _id else None
 
     def get_stats(self):
         self.cursor.execute("SELECT COUNT(*) FROM notes WHERE sent = 1 AND message_id IS NOT NULL")
@@ -55,7 +68,19 @@ def sent_note_message(message_id):
 def get_note_data():
     with DatabaseManagerNotes() as db:
         return db.get_stats()
+    
 def save_note(id , message_id):
     with DatabaseManagerNotes() as db:
         db.save_notes(message_id , id)
 
+def chek_id_is_exist(id) -> bool:
+    with DatabaseManagerNotes() as db:
+        is_exist = db.chek_id_exist(id)
+        if is_exist:
+            return True
+        return False
+
+def select_message_id_by_id(id):
+    with DatabaseManagerNotes() as db:
+        x = db.select_messageid_by_id(id)
+        return x if x else None

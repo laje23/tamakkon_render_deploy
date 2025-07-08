@@ -15,19 +15,6 @@ async def manage_hadith_message(chat_id , message_id , message_text ):
             db_hadith.delete_base_hadith_by_id(message_id)
             await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
 
-# notes ..............
-# async def manage_notes_message(chat_id , message_id , message_text ):
-#         note_id = db_notes.save_note_id(message_id)
-#         try:
-#             sent = await bot.send_message(group_mirror_id, process_note_message(message_text, note_id))
-#             db_notes.save_final_note_id(sent.id, note_id)
-#         except Exception as e:
-#             await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
-
-
-
-# handle updatas .................................................
-
 
 # hadith ..............................
 async def handle_hadith_updats(chat_id , update_id , update_text ):
@@ -36,17 +23,6 @@ async def handle_hadith_updats(chat_id , update_id , update_text ):
         message_id, hadith_id = result
         try:
             await bot.edit_message_caption(group_mirror_id, message_id, process_hadith_message(update_text, hadith_id))
-        except Exception as e:
-            await bot.send_message(chat_id, str(e))
-
-
-# notes ................................
-async def handle_notes_updats(chat_id , update_id , update_text ):
-    result = db_notes.select_final_note_by_base(update_id)
-    if result:
-        message_id, note_id = result
-        try:
-            await bot.edit_message_text(group_mirror_id, message_id, process_note_message(update_text, note_id))
         except Exception as e:
             await bot.send_message(chat_id, str(e))
 

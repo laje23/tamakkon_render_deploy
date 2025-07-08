@@ -50,4 +50,7 @@ async def call_handler(callback_query):
     elif t == 'save_note':
         await bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
         callback_query.author.set_state('INPUT_NUMBER_NOTE')
-        print(callback_query.author.get_state())
+        
+    elif t == 'edit_note' :
+        await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
+        callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')

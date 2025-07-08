@@ -8,7 +8,7 @@ import os
 
 load_dotenv()
 
-
+user_temp_data = {}
 # assignment initial variables...................................
 
 bot = Client(os.getenv('TOKEN'))
@@ -111,6 +111,7 @@ def note_menu():
     return InlineKeyboard(
         [InlineKeyboardButton(" ارسال یادداشت", "send_note")],
         [InlineKeyboardButton("ذخیره کردن یادداشت", "save_note")],
+        [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
 
@@ -126,6 +127,14 @@ def answer_y_n(id):
         [InlineKeyboardButton(f"بله", f"resend:{id}")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
+
+def edit_menu():
+    return InlineKeyboard(
+        [InlineKeyboardButton("ویرایش", "edit_note")],
+        [InlineKeyboardButton("بازگشت", "back_to_message")]
+    )
+
+
 
 def back_menu():
     return InlineKeyboard(

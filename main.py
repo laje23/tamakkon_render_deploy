@@ -3,6 +3,7 @@ from config import *
 from group_manager import *
 from state_handler.save_note_handler import *
 from state_handler.send_hadith_handler import *
+from state_handler.edit_note_handler import *
 from callback_handler import call_handler
 
 
@@ -19,18 +20,26 @@ async def handle_start(message):
 
 @bot.on_message(at_state('INPUT_NUMBER_NOTE') ) 
 async def first_state_save_note(message):
-    print("📥 got message in INPUT_NUMBER_NOTE:", message.text)
-    await first_step(message)
+    await first_step_save(message)
 
 
 @bot.on_message(at_state('INPUT_TEXT_NOTE'))
 async def next_state_save_note(message):
-    await next_step(message)    
+    await next_step_save(message)    
 
 
 @bot.on_message(at_state("INPUT_NUMBER_HADITH"))
 async def handle_hadith_id(message):
     await handel_number_hadith(message)
+
+
+@bot.on_message(at_state('INPUT_EDIT_NUMBER_NOTE'))
+async def first_state_edit_not(message):
+    await first_state_edit(message)
+    
+@bot.on_message(at_state('INPUT_EDIT_TEXT_NOTE'))
+async def next_state_edit_not(message):
+    await next_state_edit(message)
 
 
 @bot.on_message(group)
