@@ -3,7 +3,7 @@ from config import db_hadith , db_notes, bot, group_mirror_id, photo_url, proces
 
 
 
-# manage group messages ......................................
+# manage group messages 
 
 # hadith ............
 async def manage_hadith_message(chat_id , message_id , message_text ):
@@ -16,13 +16,13 @@ async def manage_hadith_message(chat_id , message_id , message_text ):
             await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
 
 # notes ..............
-async def manage_notes_message(chat_id , message_id , message_text ):
-        note_id = db_notes.save_note_id(message_id)
-        try:
-            sent = await bot.send_message(group_mirror_id, process_note_message(message_text, note_id))
-            db_notes.save_final_note_id(sent.id, note_id)
-        except Exception as e:
-            await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
+# async def manage_notes_message(chat_id , message_id , message_text ):
+#         note_id = db_notes.save_note_id(message_id)
+#         try:
+#             sent = await bot.send_message(group_mirror_id, process_note_message(message_text, note_id))
+#             db_notes.save_final_note_id(sent.id, note_id)
+#         except Exception as e:
+#             await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
 
 
 
@@ -85,10 +85,15 @@ async def send_auto_note():
 # send  hadith  by number ...............................
 
 
-async def  send_hadith_by_id(final_id , chat_id , message_id):
+async def send_hadith_by_id(final_id , chat_id , message_id):
     try: 
         await bot.copy_message(chanel_tamakkon_id, group_mirror_id, final_id)
         db_hadith.sent_message(final_id)
         return 'حدیث ارسال شد '
     except Exception as e :
         return e
+    
+    
+    
+    
+    

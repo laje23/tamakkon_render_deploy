@@ -99,11 +99,19 @@ def main_menu(is_admin):
 
 def message_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("حدیث", "menu_hadith")],
-        [InlineKeyboardButton("یادداشت", "send_note")],
+        [InlineKeyboardButton("حدیث", "hadith_menu")],
+        [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("گرفتن آمار", "get_stats")],
         [InlineKeyboardButton("بازگشت", "back_to_main")]
         
+    )
+    
+    
+def note_menu():
+    return InlineKeyboard(
+        [InlineKeyboardButton(" ارسال یادداشت", "send_note")],
+        [InlineKeyboardButton("ذخیره کردن یادداشت", "save_note")],
+        [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
 
 def hadith_menu():

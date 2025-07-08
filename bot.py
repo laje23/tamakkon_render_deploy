@@ -2,7 +2,6 @@ from balethon.conditions import command, group, at_state, private, equals
 from config import *  
 from group_manager import *
 
-
 # todo ...............................
 @bot.on_callback_query(private)
 async def reply_buttons(callback_query):
@@ -20,9 +19,12 @@ async def reply_buttons(callback_query):
             pass
         await bot.edit_message_text(ci ,mi ,'منوی مدیریت پیام' , message_menu() )
         
-    elif t == 'menu_hadith':
+    elif t == 'hadith_menu':
         await bot.edit_message_text(ci ,mi ,'لطفا یک گزینه برای ارسال انتخاب کنید' , hadith_menu() )
-        
+    
+    elif t == 'note_menu':
+        await bot.edit_message_text(ci ,mi ,'لطفا یک گزینه را انتخاب کنید' , note_menu() )
+    
     elif t == 'send_note':
         text = await send_auto_note()
         await bot.edit_message_text(ci , mi, text , back_menu())
@@ -36,8 +38,11 @@ async def reply_buttons(callback_query):
         await bot.edit_message_text(ci , mi, total , back_menu())
     
     elif t == 'send_hadith_by_number':
-        callback_query.message.author.set_state('INPUT_NUMBER')
+        callback_query.message.author.set_state('INPUT_NUMBER_HADITH')
         await bot.send_message(ci , 'شماره حدیث رو وارد کنید' , back_menu())
+        
+    elif t == 'save_not':
+        callback_query.message.author.set_state('INPUT_NUMBER_NOTE')
         
         
     elif t.startswith('resend:'):
@@ -49,16 +54,16 @@ async def reply_buttons(callback_query):
 
 @bot.on_message(command("start") & private)
 async def handle_start(message):
-    await bot.send_message(message.chat.id, "سلام! یکی از گزینه‌ها رو انتخاب کن:", main_menu(True))
+    await bot.send_message(message.chat.id, "سلام! یکی از گزینه‌ها رو انتخاب کنید:", main_menu(True))
 
 
 # 🎯 دریافت شماره حدیث از ریپلای
 
 
-@bot.on_message(at_state("INPUT_NUMBER"))
+@bot.on_message(at_state("INPUT_NUMBER_HADITH"))
 async def handle_hadith_id(message):
     if not message.text.isdigit() and  int(message.text)<= 0:
-        await bot.send_message(message.chat.id, "❗️ لطفاً فقط عدد وارد کنید.")
+        await bot.send_message(message.chat.id, "❗️ لطفاً فقط عدد مثبت وارد کنید.")
         return
 
     try:
@@ -77,20 +82,35 @@ async def handle_hadith_id(message):
         await bot.send_message(message.chat.id, "✅ حدیث ارسال شد." , back_menu())
         message.author.del_state()
     except Exception as e:
-        await bot.send_message(message.chat.id, f"⚠️ خطا:\n{e}")
+        await bot.send_message(message.chat.id, f"⚠️ خطا:\n{e}" , back_menu())
 
-@bot.on_message(private)
-async def handle_answer(message):
+@bot.on_message(at_state('INPUT_NUMBER_NOTE'))
+async def first_state_save_note(message):
+    global global_for_not_number
+    if not message.text.isdigit() and  int(message.text)<= 0:
+        await bot.send_message(message.chat.id, "❗️ لطفاً فقط عدد مثبت وارد کنید." , back_menu())
+        return
+    global_for_not_number = int(message.text)
+    message.author.set_state('INPUT_TEXT_NOTE')
+
+@bot.on_message(at_state('INPUT_TEXT_NOTE'))
+async def next_state_save_note(message):
+    global global_for_not_number
+    note_id = global_for_not_number
     try:
-        message_id = int(message.text)
-        await bot.copy_message(chanel_tamakkon_id, group_mirror_id, message_id)
-        db_hadith.sent_message(message_id)
-        await bot.send_message(message.chat.id, "✅ حدیث ارسال شد", back_menu())
-    except ValueError:
-        pass
-    except Exception as e:
-        await bot.send_message(message.chat.id, str(e))
-        message.author.del_state()
+        sent = bot.send_message(group_mirror_id , process_note_message(message.text , note_id))
+        db_notes.save_note(note_id ,sent.id)
+        message.author.del_satate()
+        bot.send_message(message.chat.id , 'یادداشت با موفقیت ذخیره شد ' , back_menu())
+    except Exception as e :
+        await bot.send_message(message.chat.id, f"⚠️ خطا:\n{e}" , back_menu())
+        
+    
+
+
+
+
+
 
 
 @bot.on_message(group)
@@ -98,17 +118,12 @@ async def collect_group_input(message):
     if message.chat.id == group_pajohesh_hadith_id:
         await manage_hadith_message(message.chat.id , message.id , message.text)
 
-    elif message.chat.id == group_pajohesh_notes_id:
-        await manage_notes_message(message.chat.id , message.id , message.text)
-        
 
 @bot.on_update()
 async def update_handler(update):
     if update.chat.id == group_pajohesh_hadith_id:
         await handle_hadith_updats(update.chat.id , update.id , update.text)
 
-    elif update.chat.id == group_pajohesh_notes_id:
-        await handle_notes_updats(update.chat.id , update.id , update.text)
         
 
 
