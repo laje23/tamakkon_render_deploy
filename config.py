@@ -13,7 +13,6 @@ user_temp_data = {}
 
 bot = Client(os.getenv('TOKEN'))
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
-group_pajohesh_notes_id = int(os.getenv('PAJOHESH_NOTES'))
 group_mirror_id = int(os.getenv('MIRROR'))
 chanel_tamakkon_id = int(os.getenv('CHANNEL_TAMAKKON'))
 photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
@@ -101,6 +100,7 @@ def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("حدیث", "hadith_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
+        [InlineKeyboardButton("مدیریت کانال", "manage_chanel")],
         [InlineKeyboardButton("گرفتن آمار", "get_stats")],
         [InlineKeyboardButton("بازگشت", "back_to_main")]
         
@@ -142,3 +142,8 @@ def back_menu():
     )
 
 
+def chanel_menu():
+        return InlineKeyboard(
+        [InlineKeyboardButton("ارسال پیام به کانال ", "send_message_to_chanel")],
+        [InlineKeyboardButton("بازگشت", "back_to_message")]
+    )

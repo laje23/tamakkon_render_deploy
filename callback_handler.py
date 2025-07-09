@@ -44,13 +44,21 @@ async def call_handler(callback_query):
         await bot.edit_message_text(ci ,mi ,text, back_menu())
     
     elif t == 'send_hadith_by_number':
-        await bot.send_message(ci , 'شماره حدیث رو وارد کنید' , back_menu())
         callback_query.author.set_state('INPUT_NUMBER_HADITH')
+        await bot.send_message(ci , 'شماره حدیث رو وارد کنید' , back_menu())
         
     elif t == 'save_note':
-        await bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
         callback_query.author.set_state('INPUT_NUMBER_NOTE')
+        await bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
         
     elif t == 'edit_note' :
-        await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
         callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')
+        await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
+    
+    elif t == 'manage_chanel':
+        await bot.edit_message_text(ci , mi, 'یک گزینه را انتخاب کنید' , chanel_menu())
+    
+    
+    elif t == 'send_message_to_chanel':
+        callback_query.author.set_state('SEND_MESSAGE_TO_CHANEL')
+        await bot.send_message(ci , 'لطفا پیام (یا رسانه) را ارسال کنید' , back_menu())

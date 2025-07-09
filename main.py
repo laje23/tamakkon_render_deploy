@@ -1,9 +1,7 @@
 from balethon.conditions import command, group, at_state, private, equals
 from config import *  
 from group_manager import *
-from state_handler.save_note_handler import *
-from state_handler.send_hadith_handler import *
-from state_handler.edit_note_handler import *
+from state_handler import *
 from callback_handler import call_handler
 
 
@@ -41,6 +39,11 @@ async def first_state_edit_not(message):
 async def next_state_edit_not(message):
     await next_state_edit(message)
 
+bot.on_message(at_state('SEND_MESSAGE_TO_CHANEL'))
+async def send_to_chanle(message):
+    print ('...................')
+    await send_message_to_chanel(message)
+
 
 @bot.on_message(group)
 async def collect_group_input(message):
@@ -52,6 +55,8 @@ async def collect_group_input(message):
 async def update_handler(message):
     if message.chat.id == group_pajohesh_hadith_id:
         await handle_hadith_updats(message.chat.id , message.id , message.text)
+        
+
 
 
 
