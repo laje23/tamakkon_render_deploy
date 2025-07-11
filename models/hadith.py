@@ -18,7 +18,7 @@ class DatabaseManagerHadith:
             CREATE TABLE IF NOT EXISTS hadith (
                 id SERIAL PRIMARY KEY,
                 base_message_id BIGINT,
-                final_message_id BIGINT,
+                bale_message_id BIGINT,
                 sent INTEGER DEFAULT 0
             );
         """)
@@ -29,51 +29,51 @@ class DatabaseManagerHadith:
             (base_id,)
         )
         return self.cursor.fetchone()[0]
-
+        
     def fetch_random_unsent(self):
         self.cursor.execute(
-            "SELECT final_message_id FROM hadith WHERE sent = %s ORDER BY RANDOM() LIMIT 1"
+            "SELECT bale_message_id FROM hadith WHERE sent = %s ORDER BY RANDOM() LIMIT 1"
         , (0,))
         row = self.cursor.fetchone()
         return row[0] if row else None
 
     def fetch_by_id(self, id):
         self.cursor.execute(
-            "SELECT final_message_id, sent FROM hadith WHERE id = %s",
+            "SELECT bale_message_id, sent FROM hadith WHERE id = %s",
             (id,)
         )
         return self.cursor.fetchone()
 
     def update_final_id(self, final_id, id):
         self.cursor.execute(
-            "UPDATE hadith SET final_message_id = %s WHERE id = %s",
+            "UPDATE hadith SET bale_message_id = %s WHERE id = %s",
             (final_id, id)
         )
 
     def mark_sent(self, message_id):
         self.cursor.execute(
-            "UPDATE hadith SET sent = 1 WHERE final_message_id = %s",
+            "UPDATE hadith SET sent = 1 WHERE bale_message_id = %s",
             (message_id,)
         )
 
     def get_by_base(self, base_id):
         self.cursor.execute(
-            "SELECT final_message_id, id FROM hadith WHERE base_message_id = %s",
+            "SELECT bale_message_id, id FROM hadith WHERE base_message_id = %s",
             (base_id,)
         )
         return self.cursor.fetchone()
 
     def get_stats(self):
-        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 1 AND final_message_id IS NOT NULL")
+        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 1 AND bale_message_id IS NOT NULL")
         sent = self.cursor.fetchone()[0]
-        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 0 AND final_message_id IS NOT NULL")
+        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 0 AND bale_message_id IS NOT NULL")
         unsent = self.cursor.fetchone()[0]
         total = sent + unsent
         return f"📗 آمار احادیث:\n➖ کل: {total}\n✅ ارسال‌شده: {sent}\n📭 ارسال‌نشده: {unsent}"
 
 
     def get_base_ids_without_final(self):
-        self.cursor.execute("SELECT base_message_id FROM hadith WHERE final_message_id IS NULL")
+        self.cursor.execute("SELECT base_message_id FROM hadith WHERE bale_message_id IS NULL")
         rows = self.cursor.fetchall()
         return [row[0] for row in rows]
 

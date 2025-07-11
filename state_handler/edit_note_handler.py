@@ -11,8 +11,16 @@ async def first_state_edit(message):
         await bot.send_message(message.chat.id , 'این یادداشت موجود نیست .آن را اول ایجاد کنید' , back_menu())
         return
         
+    result = db_notes.select_message_id_by_id(message.text)
+    if not result:
+        await bot.send_message(message.chat.id , 'یادداشت پیدا نشد. ' , back_menu())
+        return
+    note_message_id , sent = result 
+    if sent == 1 :
+        await bot.send_message(message.chat.id , 'یادداشت ارسال شده است نمیتوان آن را ویرایش کرد. ' , back_menu())
+        return 
     
-    user_temp_data[message.author.id] = {"note_edit_number": message.text}
+    user_temp_data[message.author.id] = {"note_edit_number":(note_message_id , message.text )}
     
     message.author.set_state('INPUT_EDIT_TEXT_NOTE')
     await bot.send_message(message.chat.id, " متن یادداشت رو بفرستید")
@@ -20,10 +28,10 @@ async def first_state_edit(message):
     
 async def next_state_edit(message):
     user_id = message.author.id
-    note_id = user_temp_data.get(user_id, {}).get("note_edit_number")
+    note_message_id ,note_id = user_temp_data.get(user_id, {}).get("note_edit_number")
     note_text = message.text
     
-    note_message_id =db_notes.select_message_id_by_id(note_id)
+    
     try :
         await bot.edit_message_text(group_mirror_id , note_message_id , process_note_message(note_text , note_id))
         await bot.send_message(message.chat.id , 'ویرایش انجام شد' , back_menu())

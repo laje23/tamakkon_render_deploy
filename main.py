@@ -1,9 +1,11 @@
-from balethon.conditions import command, group, at_state, private, equals
+from balethon.conditions import command, group, at_state, private , all
 from config import *  
 from group_manager import *
 from state_handler import *
 from callback_handler import call_handler
+from dotenv import load_dotenv
 
+load_dotenv()
 
 
 @bot.on_callback_query(private)
@@ -34,14 +36,13 @@ async def handle_hadith_id(message):
 @bot.on_message(at_state('INPUT_EDIT_NUMBER_NOTE'))
 async def first_state_edit_not(message):
     await first_state_edit(message)
-    
+
 @bot.on_message(at_state('INPUT_EDIT_TEXT_NOTE'))
 async def next_state_edit_not(message):
     await next_state_edit(message)
 
-bot.on_message(at_state('SEND_MESSAGE_TO_CHANEL'))
+@bot.on_message(at_state('SEND_MESSAGE_TO_CHANEL') &  all )
 async def send_to_chanle(message):
-    print ('...................')
     await send_message_to_chanel(message)
 
 

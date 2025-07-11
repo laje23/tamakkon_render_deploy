@@ -1,12 +1,8 @@
 from balethon.objects import InlineKeyboard , InlineKeyboardButton , Message
-from  dotenv import load_dotenv
 from balethon import Client
 from models import hadith as db_hadith
 from models import notes as db_notes
 import os 
-
-
-load_dotenv()
 
 user_temp_data = {}
 # assignment initial variables...................................
@@ -14,7 +10,7 @@ user_temp_data = {}
 bot = Client(os.getenv('TOKEN'))
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
 group_mirror_id = int(os.getenv('MIRROR'))
-chanel_tamakkon_id = int(os.getenv('CHANNEL_TAMAKKON'))
+chanel_bale_id = int(os.getenv('CHANNEL_TAMAKKON'))
 photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
 
 
@@ -36,7 +32,7 @@ db_notes.create_table_note()
 def get_state():
     hadith_data = db_hadith.get_hadith_data()
     note_data = db_notes.get_note_data()
-    total_data = f'📗 آمار احادیث: \n{hadith_data} \n\n\n📕 آمار یادداشت‌ها: \n {note_data}'
+    total_data = f'امار  .... \n{hadith_data} \n\n\n {note_data}'
     return total_data
 
 
@@ -100,7 +96,7 @@ def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("حدیث", "hadith_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
-        [InlineKeyboardButton("مدیریت کانال", "manage_chanel")],
+        [InlineKeyboardButton("ارسال پیام به کانال ", "send_message_to_chanel")],
         [InlineKeyboardButton("گرفتن آمار", "get_stats")],
         [InlineKeyboardButton("بازگشت", "back_to_main")]
         
@@ -110,7 +106,7 @@ def message_menu():
 def note_menu():
     return InlineKeyboard(
         [InlineKeyboardButton(" ارسال یادداشت", "send_note")],
-        [InlineKeyboardButton("ذخیره کردن یادداشت", "save_note")],
+        [InlineKeyboardButton("یادداشت جدید ", "save_note")],
         [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
@@ -138,12 +134,5 @@ def edit_menu():
 
 def back_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("بازگشت", "back_to_message")]
-    )
-
-
-def chanel_menu():
-        return InlineKeyboard(
-        [InlineKeyboardButton("ارسال پیام به کانال ", "send_message_to_chanel")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )

@@ -1,16 +1,16 @@
 
 from config import *
 from group_manager import *
-
+admins = [893366360 , 1462760140]
 
 
 async def call_handler(callback_query):
     t = callback_query.data
     ci = callback_query.message.chat.id
     mi = callback_query.message.id
-    
+    ui = callback_query.author.id
     if t == 'back_to_main':
-        await bot.edit_message_text(ci ,mi ,"سلام! یکی از گزینه‌ها رو انتخاب کن:" , main_menu(True))
+        await bot.edit_message_text(ci ,mi ,"سلام! یکی از گزینه‌ها رو انتخاب کن:" , main_menu(ui in admins))
     
     elif t == 'back_to_message':
         try:
@@ -54,9 +54,6 @@ async def call_handler(callback_query):
     elif t == 'edit_note' :
         callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')
         await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
-    
-    elif t == 'manage_chanel':
-        await bot.edit_message_text(ci , mi, 'یک گزینه را انتخاب کنید' , chanel_menu())
     
     
     elif t == 'send_message_to_chanel':
