@@ -17,18 +17,18 @@ class DatabaseManagerHadith:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS hadith (
                 id SERIAL PRIMARY KEY,
-                base_message_id BIGINT,
-                bale_message_id BIGINT,
+                bale_message_id BIGINT DEFAULT NULL,
+                eitaa_message_id BIGINT DEFAULT NULL,
                 sent INTEGER DEFAULT 0
             );
         """)
 
-    def insert_base_id(self, base_id):
+    def insert_id(self):
         self.cursor.execute(
-            "INSERT INTO hadith (base_message_id) VALUES (%s) RETURNING id",
-            (base_id,)
+            "INSERT INTO hadith DEFAULT VALUES RETURNING id"
         )
         return self.cursor.fetchone()[0]
+
         
     def fetch_random_unsent(self):
         self.cursor.execute(
@@ -44,11 +44,12 @@ class DatabaseManagerHadith:
         )
         return self.cursor.fetchone()
 
-    def update_final_id(self, final_id, id):
+    def update_message_ids(self, bale_message_id, final_message_id, id):
         self.cursor.execute(
-            "UPDATE hadith SET bale_message_id = %s WHERE id = %s",
-            (final_id, id)
+            "UPDATE hadith SET bale_message_id = %s, eitaa_message_id = %s WHERE id = %s",
+            (bale_message_id, final_message_id, id)
         )
+
 
     def mark_sent(self, message_id):
         self.cursor.execute(
@@ -87,9 +88,14 @@ def create_hadith_table():
     with DatabaseManagerHadith() as db:
         db.create_table()
 
-def save_base_hadith_id(base_id):
+def give_hadith_id():
     with DatabaseManagerHadith() as db:
-        return db.insert_base_id(base_id)
+        return db.insert_id()
+
+def save_hadith_ids(id, eitaa_id, bale_id):
+    with DatabaseManagerHadith() as db:
+        db.update_message_ids(eitaa_id, bale_id , id)
+
 
 def select_random_hadith():
     with DatabaseManagerHadith() as db:
@@ -98,10 +104,6 @@ def select_random_hadith():
 def select_hadith_by_id(id):
     with DatabaseManagerHadith() as db:
         return db.fetch_by_id(id)
-
-def save_final_hadith_id(final_id, hadith_id):
-    with DatabaseManagerHadith() as db:
-        db.update_final_id(final_id, hadith_id)
 
 def sent_message(message_id):
     with DatabaseManagerHadith() as db:
@@ -118,10 +120,7 @@ def get_hadith_data():
 def fetch_base_ids_without_final():
     with DatabaseManagerHadith() as db:
         return db.get_base_ids_without_final()
-    
-def delete_base_hadith_by_id(base_id):
-    with DatabaseManagerHadith() as db:
-        db.delete_base_message(base_id)
+
 
     
     

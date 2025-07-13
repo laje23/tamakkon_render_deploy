@@ -4,7 +4,7 @@ from group_manager import *
 from state_handler import *
 from callback_handler import call_handler
 from dotenv import load_dotenv
-
+import asyncio 
 load_dotenv()
 
 
@@ -49,7 +49,7 @@ async def send_to_chanle(message):
 @bot.on_message(group)
 async def collect_group_input(message):
     if message.chat.id == group_pajohesh_hadith_id:
-        await manage_hadith_message(message.chat.id , message.id , message.text)
+        await save_hadith_message(message.chat.id , message.text)
 
 
 @bot.on_edited_message(group)

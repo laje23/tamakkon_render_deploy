@@ -1,4 +1,4 @@
-from config import db_hadith , db_notes, bot, group_mirror_id, photo_url, process_hadith_message, process_note_message, chanel_bale_id
+from config import db_hadith , db_notes, bot, bale_group_mirror_id, photo_url, process_hadith_message, process_note_message, bale_chanel_id
 from send_message_handler import *
 
 
@@ -6,13 +6,11 @@ from send_message_handler import *
 # manage group messages 
 
 # hadith ............
-async def manage_hadith_message(chat_id , message_id , message_text ):
-        id_ = db_hadith.save_base_hadith_id(message_id)
+async def save_hadith_message(chat_id , message_text ):
+        id_ = db_hadith.give_hadith_id()
         try:
-            sent = await bot.send_photo(group_mirror_id, photo_url, process_hadith_message(message_text, id_))
-            db_hadith.save_final_hadith_id(sent.id, id_)
+            await send_hadith_to_mirrors(id_ ,message_text )
         except Exception as e:
-            db_hadith.delete_base_hadith_by_id(message_id)
             await bot.send_message(chat_id, f"خطا در ارسال:\n{e}")
 
 
@@ -22,7 +20,7 @@ async def handle_hadith_updats(chat_id , update_id , update_text ):
     if result:
         message_id, hadith_id = result
         try:
-            await bot.edit_message_caption(group_mirror_id, message_id, process_hadith_message(update_text, hadith_id))
+            await bot.edit_message_caption(bale_group_mirror_id, message_id, process_hadith_message(update_text, hadith_id))
         except Exception as e:
             await bot.send_message(chat_id, str(e))
 
@@ -33,7 +31,7 @@ async def handle_hadith_updats(chat_id , update_id , update_text ):
 
 # hadith ................................
 async def send_auto_hadith():
-
+    pass
 
 # notes .............................
 async def send_auto_note():
@@ -41,7 +39,7 @@ async def send_auto_note():
     if not msg_id:
         return "📭 تمام یادداشت‌ها ارسال شده‌اند."
     try:
-        await bot.copy_message(chanel_bale_id, group_mirror_id, msg_id)
+        await bot.copy_message(bale_chanel_id, bale_group_mirror_id, msg_id)
         db_notes.sent_note_message(msg_id)
         return "✅ یادداشت با موفقیت ارسال شد."
     except Exception as e:
@@ -54,7 +52,7 @@ async def send_auto_note():
 
 async def send_hadith_by_id(final_id):
     try: 
-        await bot.copy_message(chanel_bale_id, group_mirror_id, final_id)
+        await bot.copy_message(bale_chanel_id, bale_group_mirror_id, final_id)
         db_hadith.sent_message(final_id)
         return 'حدیث ارسال شد '
     except Exception as e :

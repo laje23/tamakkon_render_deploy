@@ -20,22 +20,25 @@ async def call_handler(callback_query):
         await bot.edit_message_text(ci ,mi ,'منوی مدیریت پیام' , message_menu() )
         
     elif t == 'hadith_menu':
-        await bot.edit_message_text(ci ,mi ,'لطفا یک گزینه برای ارسال انتخاب کنید' , hadith_menu() )
+        pass
+        # await bot.edit_message_text(ci ,mi ,'لطفا یک گزینه برای ارسال انتخاب کنید' , hadith_menu() )
     
     elif t == 'note_menu':
         await bot.edit_message_text(ci ,mi ,'لطفا یک گزینه را انتخاب کنید' , note_menu() )
     
     elif t == 'send_note':
-        text = await send_auto_note()
-        await bot.edit_message_text(ci , mi, text , back_menu())
+        pass
+        # text = await send_auto_note()
+        # await bot.edit_message_text(ci , mi, text , back_menu())
     
     elif t == 'send_random_hadith':
         text = await send_auto_hadith()
         await bot.edit_message_text(ci ,mi ,  text , back_menu())
 
     elif t == 'get_stats':
-        total=  get_state()
-        await bot.edit_message_text(ci , mi, total , back_menu())
+        pass
+        # total=  get_state()
+        # await bot.edit_message_text(ci , mi, total , back_menu())
     
     elif t.startswith('resend:'):
         callback_query.author.del_state()
@@ -51,11 +54,11 @@ async def call_handler(callback_query):
         callback_query.author.set_state('INPUT_NUMBER_NOTE')
         await bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
         
-    elif t == 'edit_note' :
-        callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')
-        await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
+    # elif t == 'edit_note' :
+    #     callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')
+    #     await bot.send_message(ci , 'لطفا شماره یادداشت رو وارد کنید' , back_menu())
     
     
-    elif t == 'send_message_to_chanel':
-        callback_query.author.set_state('SEND_MESSAGE_TO_CHANEL')
-        await bot.send_message(ci , 'لطفا پیام (یا رسانه) را ارسال کنید' , back_menu())
+    # elif t == 'send_message_to_chanel':
+    #     callback_query.author.set_state('SEND_MESSAGE_TO_CHANEL')
+    #     await bot.send_message(ci , 'لطفا پیام (یا رسانه) را ارسال کنید' , back_menu())

@@ -1,16 +1,23 @@
-from balethon.objects import InlineKeyboard , InlineKeyboardButton , Message
+from balethon.objects import InlineKeyboard , InlineKeyboardButton 
 from balethon import Client
 from models import hadith as db_hadith
 from models import notes as db_notes
 import os 
 
+
 user_temp_data = {}
 # assignment initial variables...................................
 
-bot = Client(os.getenv('TOKEN'))
+bot = Client(os.getenv('BALE_BOT_TOKEN'))
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
-group_mirror_id = int(os.getenv('MIRROR'))
-chanel_bale_id = int(os.getenv('CHANNEL_TAMAKKON'))
+
+bale_group_mirror_id = int(os.getenv('BALE_MIRROR'))
+eitaa_group_mirror_id = int(os.getenv('EITAA_MIRROR'))
+
+
+bale_chanel_id = int(os.getenv('CHANNEL_BALE'))
+eitaa_chanel_id = int(os.getenv('CHANNEL_EITAA'))
+
 photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
 
 

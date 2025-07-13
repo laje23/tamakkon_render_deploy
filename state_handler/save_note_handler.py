@@ -1,6 +1,6 @@
-from config import bot , back_menu , db_notes , group_mirror_id , process_note_message , user_temp_data , edit_menu
+from config import bot , back_menu , db_notes , bale_group_mirror_id , process_note_message , user_temp_data , edit_menu
 
-
+from send_message_handler import send_note_to_mirrors
 
 
 
@@ -9,10 +9,10 @@ async def first_step_save(message):
         await bot.send_message(message.chat.id, "❗️ لطفاً فقط عدد مثبت وارد کنید.", back_menu())
         return
     
-    if db_notes.chek_id_is_exist(int(message.text)):
-        message.author.del_state()
-        await bot.send_message(message.chat.id , 'این یادداشت موجود است . میخواهید آن را ویرایش کنید' , edit_menu())
-        return
+    # if db_notes.chek_id_is_exist(int(message.text)):
+    #     message.author.del_state()
+    #     await bot.send_message(message.chat.id , 'این یادداشت موجود است . میخواهید آن را ویرایش کنید' , edit_menu())
+    #     return
     
     
     user_temp_data[message.author.id] = {"note_number": message.text}
@@ -37,10 +37,8 @@ async def next_step_save(message):
     note_text = message.text
 
     try :
-        sent = await bot.send_message(group_mirror_id , process_note_message(note_text , note_number))
-        db_notes.save_note(note_number ,sent.id )
-        await bot.send_message(message.chat.id, "یادداشت با موفقیت ذخیره شد ✅" , back_menu())
-        message.author.del_state()
+        await send_note_to_mirrors(note_number , note_text)
+        await bot.send_message(message.chat.id , 'یادداشت ذخیره شد ' , back_menu())
     except Exception as e :
         await bot.send_message(message.chat.id , str(e) , back_menu())
     # حذف از حافظه موقت
