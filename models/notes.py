@@ -17,50 +17,50 @@ class NoteTableManager:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY,
-                bale_message_id BIGINT,
-                eitaa_message_id BIGINT,
+                content TEXT DEFAULT NULL, 
                 sent INTEGER DEFAULT 0
             );
         """)
 
-    def mark_sent(self, id):
+    def update_sent_to_1(self, id):
         self.cursor.execute("UPDATE notes SET sent = 1 WHERE id = %s", (id,))
+        
+    def insert_content_and_id(self , content , id):
+        self.cursor.execute('INSERT INTO notes (id ,content) VALUES(%s,%s)' , (id,content))
 
-    def chek_id_exist(self, id):
-        self.cursor.execute("SELECT id FROM notes WHERE id = %s", (id,))
-        row = self.cursor.fetchone()
-        return bool(row)
-
-    def get_stats(self):
-        self.cursor.execute("SELECT COUNT(*) FROM notes WHERE sent = 1")
-        sent = self.cursor.fetchone()[0]
-        self.cursor.execute("SELECT COUNT(*) FROM notes WHERE sent = 0")
-        unsent = self.cursor.fetchone()[0]
-        total = sent + unsent
-        return f"📊 آمار:\n➕ کل: {total}\n✅ ارسال‌شده: {sent}\n📭 ارسال‌نشده: {unsent}"
+    def chak_id_exist(self , id ):
+        self.cursor.execute("""
+            SELECT EXISTS(SELECT 1 FROM notes WHERE id = %s);
+        """, (id,))
+        
+        exists = self.cursor.fetchone()[0]
+        return exists 
     
-
-    def insert_message_ids(self , id , bale_message_id , eitaa_message_id ):
+    def return_auto_content(self):
         self.cursor.execute(
-            'INSERT INTO notes (id , bale_message_id , eitaa_message_id) VALUES (%s,%s,%s)' ,
-            (id , bale_message_id ,eitaa_message_id)
+            'SELECT content , id FROM notes WHERE sent = 0 ORDER BY id '
         )
+        return self.cursor.fetchone()
 
 
-def create_table_note():
-    with NoteTableManager() as db:
+
+def create_table():
+    with NoteTableManager() as db :
         db.create_table()
+        
+def new_note(id ,content):
+    with NoteTableManager() as db :
+        db.insert_content_and_id(content,id)
 
-def sent_note_message(bale_message_id):
-    with NoteTableManager() as db:
-        db.mark_sent(bale_message_id)
-
-def get_note_data():
-    with NoteTableManager() as db:
-        return db.get_stats()
+def chek_is_exist(id):
+    with NoteTableManager() as db :
+        return db.chak_id_exist(id)
     
-def save_note_ids(id , bale_id , eitaa_id):
-    with NoteTableManager() as db:
-        return db.insert_message_ids(id , bale_id , eitaa_id)
-
+def auto_return_content() -> tuple:
+    with NoteTableManager() as db :
+        return db.return_auto_content()
     
+def mark_sent(id):
+    with NoteTableManager() as db :
+        db.update_sent_to_1(id)
+    return 

@@ -1,6 +1,6 @@
 from models.database_connection import get_connection
 
-class DatabaseManagerHadith:
+class HadithTabelManager:
     def __init__(self):
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
@@ -17,111 +17,80 @@ class DatabaseManagerHadith:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS hadith (
                 id SERIAL PRIMARY KEY,
-                bale_message_id BIGINT DEFAULT NULL,
-                eitaa_message_id BIGINT DEFAULT NULL,
+                message_id INTEGER DEFAULT NULL,
+                content TEXT DEFAULT NULL,
                 sent INTEGER DEFAULT 0
             );
         """)
 
-    def insert_id(self):
+    def insert_row(self , message_id , content ):
         self.cursor.execute(
-            "INSERT INTO hadith DEFAULT VALUES RETURNING id"
+            'INSERT INTO hadith (message_id , content) VALUES (%s,%s) ',
+            (message_id , content)
+            
         )
-        return self.cursor.fetchone()[0]
 
-        
-    def fetch_random_unsent(self):
+    def auto_select_content(self):
         self.cursor.execute(
-            "SELECT bale_message_id FROM hadith WHERE sent = %s ORDER BY RANDOM() LIMIT 1"
-        , (0,))
-        row = self.cursor.fetchone()
-        return row[0] if row else None
+            'SELECT content , id FROM hadith WHERE sent = 0 ORDER BY id LIMIT 1'
+        )
+        content = self.cursor.fetchone()
+        return content if content else None 
 
-    def fetch_by_id(self, id):
+    def update_sent_to_1(self , id ):
         self.cursor.execute(
-            "SELECT bale_message_id, sent FROM hadith WHERE id = %s",
+            'UPDATE hadith SET sent = 1 WHERE id = %s ',
             (id,)
         )
-        return self.cursor.fetchone()
 
-    def update_message_ids(self, bale_message_id, final_message_id, id):
+    def update_content(self, message_id, new_content):
         self.cursor.execute(
-            "UPDATE hadith SET bale_message_id = %s, eitaa_message_id = %s WHERE id = %s",
-            (bale_message_id, final_message_id, id)
+            'UPDATE hadith SET content = %s WHERE message_id = %s',
+            (new_content, message_id)
+        )
+
+    def update_sent_to_1(self,id):
+        self.cursor.execute(
+            'UPDATE hadith SET sent = %s WHERE id = %s',
+            (1,id)
         )
 
 
-    def mark_sent(self, message_id):
-        self.cursor.execute(
-            "UPDATE hadith SET sent = 1 WHERE bale_message_id = %s",
-            (message_id,)
-        )
-
-    def get_by_base(self, base_id):
-        self.cursor.execute(
-            "SELECT bale_message_id, id FROM hadith WHERE base_message_id = %s",
-            (base_id,)
-        )
-        return self.cursor.fetchone()
-
-    def get_stats(self):
-        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 1 AND bale_message_id IS NOT NULL")
-        sent = self.cursor.fetchone()[0]
-        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 0 AND bale_message_id IS NOT NULL")
-        unsent = self.cursor.fetchone()[0]
-        total = sent + unsent
-        return f"📗 آمار احادیث:\n➖ کل: {total}\n✅ ارسال‌شده: {sent}\n📭 ارسال‌نشده: {unsent}"
 
 
-    def get_base_ids_without_final(self):
-        self.cursor.execute("SELECT base_message_id FROM hadith WHERE bale_message_id IS NULL")
-        rows = self.cursor.fetchall()
-        return [row[0] for row in rows]
-
-
-
-    def delete_base_message(self , id):
-        self.cursor.execute('DELETE FROM hadiths WHERE base_message_id = %s' , (id,))
-
-# توابع سطح بالا
-def create_hadith_table():
-    with DatabaseManagerHadith() as db:
+def create_table():
+    with HadithTabelManager() as db :
         db.create_table()
-
-def give_hadith_id():
-    with DatabaseManagerHadith() as db:
-        return db.insert_id()
-
-def save_hadith_ids(id, eitaa_id, bale_id):
-    with DatabaseManagerHadith() as db:
-        db.update_message_ids(eitaa_id, bale_id , id)
+    return
 
 
-def select_random_hadith():
-    with DatabaseManagerHadith() as db:
-        return db.fetch_random_unsent()
 
-def select_hadith_by_id(id):
-    with DatabaseManagerHadith() as db:
-        return db.fetch_by_id(id)
-
-def sent_message(message_id):
-    with DatabaseManagerHadith() as db:
-        db.mark_sent(message_id)
-
-def select_finalid_by_baseid(base_id):
-    with DatabaseManagerHadith() as db:
-        return db.get_by_base(base_id)
-
-def get_hadith_data():
-    with DatabaseManagerHadith() as db:
-        return db.get_stats()
-
-def fetch_base_ids_without_final():
-    with DatabaseManagerHadith() as db:
-        return db.get_base_ids_without_final()
+def save_id_and_content(message_id , content):
+    with HadithTabelManager() as db :
+        db.insert_row(message_id , content)
+    return
+        
 
 
-    
-    
-    
+def message_sent(id):
+    with HadithTabelManager() as db :
+        db.update_sent_to_1(id)
+    return
+
+
+
+def edit_content(message_id , new_content):
+    with HadithTabelManager() as db :
+        db.update_content(message_id , new_content)
+    return
+
+
+def return_auto_content():
+    with HadithTabelManager() as db : 
+        return db.auto_select_content()
+
+
+def mark_sent(id):
+    with HadithTabelManager() as db : 
+        db.update_sent_to_1(id)
+    return 

@@ -1,5 +1,6 @@
 from balethon.objects import InlineKeyboard , InlineKeyboardButton 
 from balethon import Client
+from app_manager import EitaaBot , GapBot
 from models import hadith as db_hadith
 from models import notes as db_notes
 import os 
@@ -8,15 +9,19 @@ import os
 user_temp_data = {}
 # assignment initial variables...................................
 
-bot = Client(os.getenv('BALE_BOT_TOKEN'))
+bale_bot = Client(os.getenv('BALE_BOT_TOKEN'))
+eitaa_bot = EitaaBot(os.getenv('EITAA_BOT_TOKEN'))
+gap_bot = GapBot(os.getenv('GAP_BOT_TOKEN'))
+
+
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
 
 bale_group_mirror_id = int(os.getenv('BALE_MIRROR'))
 eitaa_group_mirror_id = int(os.getenv('EITAA_MIRROR'))
 
 
-bale_chanel_id = int(os.getenv('CHANNEL_BALE'))
-eitaa_chanel_id = int(os.getenv('CHANNEL_EITAA'))
+bale_channel_id = int(os.getenv('CHANNEL_BALE'))
+eitaa_channel_id = int(os.getenv('CHANNEL_EITAA'))
 
 photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
 
@@ -28,8 +33,8 @@ photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
 
 # create tables ...............................................
 
-db_hadith.create_hadith_table()
-db_notes.create_table_note()
+db_hadith.create_table()
+db_notes.create_table()
 
 
 
@@ -103,7 +108,7 @@ def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("حدیث", "hadith_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
-        [InlineKeyboardButton("ارسال پیام به کانال ", "send_message_to_chanel")],
+        [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("گرفتن آمار", "get_stats")],
         [InlineKeyboardButton("بازگشت", "back_to_main")]
         
@@ -112,7 +117,7 @@ def message_menu():
     
 def note_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton(" ارسال یادداشت", "send_note")],
+        [InlineKeyboardButton(" ارسال یادداشت", "auto_send_note")],
         [InlineKeyboardButton("یادداشت جدید ", "save_note")],
         [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
@@ -120,7 +125,7 @@ def note_menu():
 
 def hadith_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("ارسال تصادفی", "send_random_hadith")],
+        [InlineKeyboardButton("ارسال تصادفی", "auto_send_hadith")],
         [InlineKeyboardButton("ارسال با شماره", "send_hadith_by_number")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
