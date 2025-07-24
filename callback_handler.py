@@ -41,10 +41,6 @@ async def call_handler(callback_query):
         await bale_bot.edit_message_text(ci ,mi , 'در حال ارسال...')
         text = await _send.auto_send_not()
         await bale_bot.edit_message_text(ci ,mi ,  text , back_menu())
-    
-    elif t == 'send_hadith_by_number':
-        callback_query.author.set_state('INPUT_NUMBER_HADITH')
-        await bale_bot.send_message(ci , 'شماره حدیث رو وارد کنید' , back_menu())
         
     elif t == 'save_note':
         callback_query.author.set_state('INPUT_NUMBER_NOTE')
@@ -52,10 +48,17 @@ async def call_handler(callback_query):
     
     
     elif t =='in_update':
-        print(db_hadith.return_auto_content())
+        x= await _send.send_salavat_8()
+        if x :
+            await bale_bot.edit_message_text(ci ,mi , x , back_menu())
         
         
     elif t == 'send_to_channel':
         await bale_bot.send_message(ci , 'پیام را ارسال یا فوروارد کنید ')
         callback_query.author.set_state('SEND_MESSAGE_TO_CHANEL')
     
+    elif t == 'send_laftovers':
+        hadith= await _send.send_laftover_hadith()
+        note = await _send.send_laftover_note()
+        await bale_bot.edit_message_text(ci ,mi , f'حدیث ها \n {hadith} \n\n یادداشت ها \n {note}' , back_menu())
+        

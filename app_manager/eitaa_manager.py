@@ -12,7 +12,6 @@ class EitaaBot:
     async def send_message(self ,chat_id: int, text: str):
         url = f"{self.eitaa_base_url}/sendMessage"
         payload = {
-            "eitaa_bot_token": self.bot_token_eitaa,
             "chat_id": chat_id,
             "text": text
         }
@@ -27,13 +26,12 @@ class EitaaBot:
     async def send_file(self ,chat_id: int, file_url: str, caption=""):
         url = f"{self.eitaa_base_url}/sendFile"
         payload = {
-            "eitaa_bot_token": self.bot_token_eitaa,
             "chat_id": chat_id,
-            "caption": caption
+            "caption": caption,
         }
         async with httpx.AsyncClient() as client:
             res = await client.post(url, data=payload, files={"file": file_url})
             dic = res.json()
             if dic['ok'] == 'true':
                 return True
-            return False
+            return dic 

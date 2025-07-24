@@ -13,6 +13,7 @@ bale_bot = Client(os.getenv('BALE_BOT_TOKEN'))
 eitaa_bot = EitaaBot(os.getenv('EITAA_BOT_TOKEN'))
 gap_bot = GapBot(os.getenv('GAP_BOT_TOKEN'))
 
+debuger_id = 1462760140
 
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
 
@@ -23,10 +24,9 @@ eitaa_group_mirror_id = int(os.getenv('EITAA_MIRROR'))
 bale_channel_id = int(os.getenv('CHANNEL_BALE'))
 eitaa_channel_id = int(os.getenv('CHANNEL_EITAA'))
 
-photo_url =   'photo.jpg'       #os.getenv('POTO_URL')
-
-
-
+photo_url =   'medai/photo.jpg'       #os.getenv('POTO_URL')
+tohid_audio_url = 'media/tohid.mp3'
+salavat_audio_url = 'media/salavaat.mp3'
 
 
 
@@ -109,6 +109,7 @@ def message_menu():
         [InlineKeyboardButton("حدیث", "hadith_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
+        [InlineKeyboardButton("ارسال پیام های جا مانده ", "send_laftovers")],
         [InlineKeyboardButton("گرفتن آمار", "get_stats")],
         [InlineKeyboardButton("بازگشت", "back_to_main")]
         
@@ -126,7 +127,6 @@ def note_menu():
 def hadith_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("ارسال تصادفی", "auto_send_hadith")],
-        [InlineKeyboardButton("ارسال با شماره", "send_hadith_by_number")],
         [InlineKeyboardButton("بازگشت", "back_to_message")]
     )
 

@@ -1,4 +1,4 @@
-from config import bale_bot , back_menu , db_notes , bale_group_mirror_id , process_note_message , user_temp_data , edit_menu
+from config import bale_bot , back_menu , db_notes  , process_note_message , user_temp_data , edit_menu
 
 # from send_message_handler import send_note_to_mirrors
 

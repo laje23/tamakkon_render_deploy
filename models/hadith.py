@@ -19,7 +19,8 @@ class HadithTabelManager:
                 id SERIAL PRIMARY KEY,
                 message_id INTEGER DEFAULT NULL,
                 content TEXT DEFAULT NULL,
-                sent INTEGER DEFAULT 0
+                sent_bale INTEGER DEFAULT 0,
+                sent_eitaa INTEGER DEFAULT 0
             );
         """)
 
@@ -37,24 +38,43 @@ class HadithTabelManager:
         content = self.cursor.fetchone()
         return content if content else None 
 
-    def update_sent_to_1(self , id ):
-        self.cursor.execute(
-            'UPDATE hadith SET sent = 1 WHERE id = %s ',
-            (id,)
-        )
-
     def update_content(self, message_id, new_content):
         self.cursor.execute(
             'UPDATE hadith SET content = %s WHERE message_id = %s',
             (new_content, message_id)
         )
 
-    def update_sent_to_1(self,id):
+    def update_sent_bale_to_1(self, id, content):
         self.cursor.execute(
-            'UPDATE hadith SET sent = %s WHERE id = %s',
-            (1,id)
+            'UPDATE hadith SET sent_bale = %s WHERE id = %s OR content = %s',
+            (1, id, content)
         )
+    
+    def update_sent_eitaa_to_1(self, id, content):
+        self.cursor.execute(
+            'UPDATE hadith SET sent_eitaa = %s WHERE id = %s OR content = %s',
+            (1, id, content)
+        )
+    
+    def select_leftover_bale(self):
+        self.cursor.execute(
+            'SELECT content,id FROM hadith WHERE sent_bale = 0 AND sent_eitaa = 1'
+        )
+        content = self.cursor.fetchall()
+        return content if content else None 
+    
+    def select_leftover_eitaa(self):
+        self.cursor.execute(
+            'SELECT content,id FROM hadith WHERE sent_bale = 1 AND sent_eitaa = 0'
+        )
+        content = self.cursor.fetchall()
+        return content if content else None 
 
+    def update_sent_all_to_1(self, id, content):
+        self.cursor.execute(
+            'UPDATE hadith SET sent_eitaa = %s , sent_bale = %s WHERE id = %s OR content = %s',
+            (1,1, id, content)
+        )
 
 
 
@@ -72,12 +92,6 @@ def save_id_and_content(message_id , content):
         
 
 
-def message_sent(id):
-    with HadithTabelManager() as db :
-        db.update_sent_to_1(id)
-    return
-
-
 
 def edit_content(message_id , new_content):
     with HadithTabelManager() as db :
@@ -90,7 +104,29 @@ def return_auto_content():
         return db.auto_select_content()
 
 
-def mark_sent(id):
+def mark_sent_bale(id = 0 , content = ''):
     with HadithTabelManager() as db : 
-        db.update_sent_to_1(id)
+        db.update_sent_bale_to_1(id , content)
     return 
+
+def mark_sent_eitaa(id = 0 , content = ''):
+    with HadithTabelManager() as db : 
+        db.update_sent_eitaa_to_1(id , content)
+    return
+
+def mark_sent_all(id = 0 , content = ''):
+    with HadithTabelManager() as db : 
+        db.update_sent_all_to_1(id , content)
+    return
+
+
+def return_bale_laftover():
+    with HadithTabelManager() as db : 
+        return db.select_leftover_bale()
+
+def return_eitaa_laftover():
+    with HadithTabelManager() as db : 
+        return db.select_leftover_eitaa()
+    
+
+    
