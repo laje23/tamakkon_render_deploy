@@ -1,7 +1,7 @@
 
 from config import *
 import send_message_handler as _send
-admins = [893366360 , 1462760140]
+
 # from send_message_handler import auto_send_note_to_channels
 
 async def call_handler(callback_query):
@@ -34,8 +34,8 @@ async def call_handler(callback_query):
 
     elif t == 'get_stats':
         pass
-        # total=  get_state()
-        # await bale_bot.edit_message_text(ci , mi, total , back_menu())
+        total=  get_state()
+        await bale_bot.edit_message_text(ci , mi, total , back_menu())
 
     elif t == 'auto_send_note':
         await bale_bot.edit_message_text(ci ,mi , 'در حال ارسال...')
@@ -45,13 +45,9 @@ async def call_handler(callback_query):
     elif t == 'save_note':
         callback_query.author.set_state('INPUT_NUMBER_NOTE')
         await bale_bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
-    
-    
-    elif t =='in_update':
-        x= await _send.send_salavat_8()
-        if x :
-            await bale_bot.edit_message_text(ci ,mi , x , back_menu())
-        
+    elif t == "edit_note":
+        callback_query.author.set_state('INPUT_EDIT_NUMBER_NOTE')
+        await bale_bot.send_message(ci, 'شماره یادداشت رو وارد کنید' , back_menu())
         
     elif t == 'send_to_channel':
         await bale_bot.send_message(ci , 'پیام را ارسال یا فوروارد کنید ')

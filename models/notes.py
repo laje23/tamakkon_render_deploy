@@ -26,12 +26,13 @@ class NoteTableManager:
     def update_sent_to_1(self, id):
         self.cursor.execute("UPDATE notes SET sent = 1 WHERE id = %s", (id,))
         
+
     def insert_content_and_id(self , content , id):
         self.cursor.execute('INSERT INTO notes (id ,content) VALUES(%s,%s)' , (id,content))
 
     def chak_id_exist(self , id ):
         self.cursor.execute("""
-            SELECT EXISTS(SELECT 1 FROM notes WHERE id = %s);
+            SELECT (SELECT 1 FROM notes WHERE id = %s);
         """, (id,))
         
         exists = self.cursor.fetchone()[0]
@@ -73,6 +74,30 @@ class NoteTableManager:
         self.cursor.execute(
             'UPDATE hadith SET sent_eitaa = %s , sent_bale = %s WHERE id = %s OR content = %s',
             (1,1, id, content)
+        )
+        
+    def count_sent_status(self):
+        self.cursor.execute("""
+            SELECT
+                SUM(CASE WHEN sent_bale = 1 THEN 1 ELSE 0 END) AS bale_count,
+                SUM(CASE WHEN sent_eitaa = 1 THEN 1 ELSE 0 END) AS eitaa_count
+            FROM notes
+        """)
+        result = self.cursor.fetchone()
+        return result[0] , result[1]
+    
+    def return_sents(self , id ):
+        self.cursor.execute(
+            'SELECT sent_bale , sent_eitaa FROM notes WHERE id = %s',
+            (id,)
+        )
+        result = self.cursor.fetchone()
+        return result[0]
+
+    def update_content(self , id , content):
+        self.cursor.execute(
+            'UPDATE notes SET content = %s WHERE id = %s',
+            (content,id)
         )
 
 
@@ -116,3 +141,18 @@ def return_bale_laftover():
 def return_eitaa_laftover():
     with NoteTableManager() as db : 
         return db.select_leftover_eitaa()
+    
+def count_sent_all():
+    with NoteTableManager() as db:
+        bale , eitaa  = db.count_sent_status()
+        return f'یادداشت ها \n در بله : {bale} \n\n در ایتا : {eitaa}'
+    
+def return_sent(id):
+    with NoteTableManager() as db :
+        return db.return_sents(id)
+    
+    
+def edit_content(id , content ):
+    with NoteTableManager() as db : 
+        db.update_content(id , content)
+    return

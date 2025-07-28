@@ -15,7 +15,7 @@ async def reply_buttons(callback_query):
 
 @bale_bot.on_message(command("start") & private)
 async def handle_start(message):
-    await bale_bot.send_message(message.chat.id, "سلام! یکی از گزینه‌ها رو انتخاب کنید:", main_menu(True))
+    await bale_bot.send_message(message.chat.id, "سلام! یکی از گزینه‌ها رو انتخاب کنید:", main_menu(message.author.id in admins))
 
 @bale_bot.on_message(at_state('INPUT_NUMBER_NOTE') ) 
 async def first_state_save_note(message):

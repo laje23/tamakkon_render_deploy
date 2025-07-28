@@ -20,9 +20,9 @@ async def auto_send_hadith():
     
     try:
         with open(photo_url, 'rb') as photo:
-            bale_task = bale_bot.send_photo(bale_channel_id, photo, text)
-            eitaa_task = eitaa_bot.send_file(eitaa_channel_id, photo, text)
-            bale, eitaa = await asyncio.gather(bale_task, eitaa_task)
+            bale = await bale_bot.send_photo(bale_channel_id, photo, text)
+            eitaa = await eitaa_bot.send_file(eitaa_channel_id, photo, text)
+            
         
         if bale and eitaa:
             db_hadith.mark_sent_all(id)
@@ -49,7 +49,7 @@ async def auto_send_not():
     text = process_note_message(content , id )
     try:
         bale = await bale_bot.send_message(bale_channel_id , text)
-        eitaa =await eitaa_bot.send_message(eitaa_channel_id , text)
+        eitaa = await eitaa_bot.send_message(eitaa_channel_id , text)
         if bale and eitaa :
             db_notes.mark_sent_all(id)
         elif bale :
@@ -64,38 +64,34 @@ async def auto_send_not():
     
     
 async def send_message_to_channel(message , bot):
-        if (x := await get_media_bytes(message, bot)):
-            bin_file , typefile = x 
-            try:
-                if typefile == 'photo' :
-                    await bale_bot.send_photo(bale_channel_id , bin_file , message.caption )
-                elif typefile == 'video':
-                    await bale_bot.send_video(bale_channel_id , bin_file , message.caption )
-                elif typefile == 'voice':
-                    await bale_bot.send_voice(bale_channel_id , bin_file , message.caption )
-                elif typefile == 'audio':
-                    await bale_bot.send_audio(bale_channel_id , bin_file , message.caption )
-                else :
-                    await bale_bot.send_document(bale_channel_id , bin_file , message.caption )
-                
-                await eitaa_bot.send_file(eitaa_channel_id , bin_file , message.caption)
-                return "پیام ارسال شد"
-            except Exception as e :
-                return f"خطا در ارسال پیام \n\n{e}"
+    if (x := await get_media_bytes(message, bot)):
+        bin_file , typefile = x 
+        try:
+            if typefile == 'photo' :
+                await bale_bot.send_photo(bale_channel_id , bin_file , message.caption )
+            elif typefile == 'video':
+                await bale_bot.send_video(bale_channel_id , bin_file , message.caption )
+            # elif typefile == 'voice':
+            #     await bale_bot.send_voice(bale_channel_id , bin_file , message.caption )
+            elif typefile == 'audio':
+                await bale_bot.send_audio(bale_channel_id , bin_file , message.caption )
             
+            await eitaa_bot.send_file(eitaa_channel_id , bin_file , message.caption)
+            return "پیام ارسال شد"
+        except Exception as e :
+            return f"خطا در ارسال پیام \n\n{e}"
+    else :
+        if message.text :
+            text = message.text
+        elif message.caption:
+            text = message.caption 
+        try :
+            await bale_bot.send_message(bale_channel_id , text )
+            await eitaa_bot.send_message(eitaa_channel_id , text )
+            return "پیام ارسال شد "
+        except Exception as e :
+            return f"خطا در ارسال پیام \n\n{e}"
 
-            
-        else :
-            if message.text :
-                text = message.text
-            elif message.caption:
-                text = message.caption 
-            try :
-                await bale_bot.send_message(bale_channel_id , text )
-                await eitaa_bot.send_message(eitaa_channel_id , text )
-                return "پیام ارسال شد "
-            except Exception as e :
-                return f"خطا در ارسال پیام \n\n{e}"
             
             
 

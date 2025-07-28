@@ -31,13 +31,6 @@ class HadithTabelManager:
             
         )
 
-    def auto_select_content(self):
-        self.cursor.execute(
-            'SELECT content , id FROM hadith WHERE sent = 0 ORDER BY id LIMIT 1'
-        )
-        content = self.cursor.fetchone()
-        return content if content else None 
-
     def update_content(self, message_id, new_content):
         self.cursor.execute(
             'UPDATE hadith SET content = %s WHERE message_id = %s',
@@ -75,6 +68,22 @@ class HadithTabelManager:
             'UPDATE hadith SET sent_eitaa = %s , sent_bale = %s WHERE id = %s OR content = %s',
             (1,1, id, content)
         )
+
+    def count_sent_status(self):
+        self.cursor.execute("""
+            SELECT
+                SUM(CASE WHEN sent_bale = 1 THEN 1 ELSE 0 END) AS bale_count,
+                SUM(CASE WHEN sent_eitaa = 1 THEN 1 ELSE 0 END) AS eitaa_count
+            FROM hadith
+        """)
+        result = self.cursor.fetchone()
+        return result[0], result[1]
+    
+    def auto_select_content(self) :
+        self.cursor.execute(
+            'SELECT content , id FROM hadith WHERE sent_bale = 0 AND sent_eitaa = 0 ORDER BY id '
+        )
+        return self.cursor.fetchone()
 
 
 
@@ -129,4 +138,11 @@ def return_eitaa_laftover():
         return db.select_leftover_eitaa()
     
 
+def count_sent_all():
+    with HadithTabelManager() as db:
+        bale, eitaa = db.count_sent_status()
+        return f"""حدیث‌ها:
+
+در بله: {bale}
+در ایتا: {eitaa}"""
     

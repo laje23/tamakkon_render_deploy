@@ -1,34 +1,30 @@
 from balethon.objects import InlineKeyboard , InlineKeyboardButton 
 from balethon import Client
-from app_manager import EitaaBot , GapBot
+from app_manager import EitaaBot 
 from models import hadith as db_hadith
 from models import notes as db_notes
 import os 
-
 
 user_temp_data = {}
 # assignment initial variables...................................
 
 bale_bot = Client(os.getenv('BALE_BOT_TOKEN'))
 eitaa_bot = EitaaBot(os.getenv('EITAA_BOT_TOKEN'))
-gap_bot = GapBot(os.getenv('GAP_BOT_TOKEN'))
 
-debuger_id = 1462760140
+debuger_id = os.getenv('DEBUGER_ID')
 
 group_pajohesh_hadith_id = int(os.getenv('PAJOHESH_HADITH'))
-
-bale_group_mirror_id = int(os.getenv('BALE_MIRROR'))
-eitaa_group_mirror_id = int(os.getenv('EITAA_MIRROR'))
 
 
 bale_channel_id = int(os.getenv('CHANNEL_BALE'))
 eitaa_channel_id = int(os.getenv('CHANNEL_EITAA'))
 
-photo_url =   'medai/photo.jpg'       #os.getenv('POTO_URL')
-tohid_audio_url = 'media/tohid.mp3'
-salavat_audio_url = 'media/salavaat.mp3'
+photo_url =     os.getenv('HADITH_POTO_URL')
+tohid_audio_url =   os.getenv('TOHID_AUDIO_URL')
+salavat_audio_url =  os.getenv('SALAVAT_AUDIO_URL')
 
 
+admins = [893366360 , 1462760140]
 
 
 # create tables ...............................................
@@ -42,8 +38,8 @@ db_notes.create_table()
 # get state for db................................
 
 def get_state():
-    hadith_data = db_hadith.get_hadith_data()
-    note_data = db_notes.get_note_data()
+    hadith_data = db_hadith.count_sent_all()
+    note_data = db_notes.count_sent_all()
     total_data = f'امار  .... \n{hadith_data} \n\n\n {note_data}'
     return total_data
 
@@ -96,12 +92,15 @@ https://farsnews.ir/shnavvab
 
 
 
-def main_menu(is_admin):
-    rows = []
-    rows.append([InlineKeyboardButton("در حال بروزرسانی", "in_update")])
-    if is_admin:
-        rows.append([InlineKeyboardButton("مدیریت پیام ها", "back_to_message")])
 
+def main_menu(is_admin: bool):
+    rows = [
+        [InlineKeyboardButton("در حال بروزرسانی", "in_update")]
+    ]
+    
+    if is_admin:
+        rows.append([InlineKeyboardButton("مدیریت پیام‌ها", "back_to_message")])
+    
     return InlineKeyboard(*rows)
 
 def message_menu():
