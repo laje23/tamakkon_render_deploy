@@ -3,7 +3,6 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
 
 def get_connection():
     try:
@@ -15,5 +14,5 @@ def get_connection():
             port=os.getenv("PGPORT")
         )
     except psycopg2.Error as e:
-        print("⚠️ اتصال به دیتابیس ناموفق بود:", e)
+        print("connection to db fail : ", e)
         return None

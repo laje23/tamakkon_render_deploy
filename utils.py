@@ -1,3 +1,5 @@
+from datetime import datetime
+import jdatetime
 import io
 
 async def get_media_bytes(message, bot) -> bytes | None:
@@ -39,8 +41,6 @@ async def get_media_bytes(message, bot) -> bytes | None:
 
 
 
-from datetime import datetime
-import jdatetime
 
 def today():
     days_fa = {
