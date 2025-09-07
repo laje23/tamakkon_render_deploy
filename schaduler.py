@@ -45,9 +45,7 @@ async def scheduled_messages():
 
             err = await send_tohid()
             await send_to_debuger(f"[16:00] خطا در ارسال یادآور سوره توحید: {err}")
-            
-        elif current_time == '18:34':
-            print('.....')
+
 
         elif current_time == "20:00":
             err = await send_salavat_8()

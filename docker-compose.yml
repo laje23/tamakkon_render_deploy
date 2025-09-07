@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  tamakkon_bot:
+    build: .
+    container_name: tamakkon_bot
+    env_file:
+      - .env
+    restart: always
+
