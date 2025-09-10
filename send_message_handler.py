@@ -2,7 +2,7 @@ from config import *
 from utils import *
 import asyncio
 async def send_to_debuger(err_text):
-    if err_text and not err_text == 'پیام ارسال شد':
+    if err_text and err_text != 'پیام ارسال شد' :
         await bale_bot.send_message(debuger_id , err_text)
 
 
@@ -13,15 +13,15 @@ async def auto_send_hadith():
         return 'هیچ پیامی موجود نیست'
     
     content, id = result
-    text = process_hadith_message(content, id)
+
     
     if not os.path.exists(photo_url):
         return f'عکس موجود نیست: {photo_url}'
     
     try:
         with open(photo_url, 'rb') as photo:
-            bale = await bale_bot.send_photo(bale_channel_id, photo, text)
-            eitaa = await eitaa_bot.send_file(eitaa_channel_id, photo, text)
+            bale = await bale_bot.send_photo(bale_channel_id, photo, process_hadith_message(content, id))
+            eitaa = await eitaa_bot.send_file(eitaa_channel_id, photo, process_hadith_message(content, id , True))
             
         
         if bale and eitaa:
@@ -182,21 +182,47 @@ async def send_text_schaduler(text):
 
 
 
-async def send_tohid():
-    text = '''
-بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِیم
-قُلْ هُوَ اللَّهُ أَحَدٌ ﴿١﴾
+async def send_tohid(time):
 
-اللَّهُ الصَّمَدُ ﴿٢﴾
+    reminders = {
+    "06:00": """صبح‌تون نورانی به ذکر خدا
+    روز رو با تلاوت سوره مبارکه توحید شروع کنیم.
+    بیاید همین حالا با صوتی که گذاشتیم، همگی با هم بخونیم:
+    «قُلْ هُوَ اللّهُ أَحَد» 🌸
+    انرژی روزتون رو از یاد خدا بگیرید 🙏
 
-لَمْ یَلِدْ وَلَمْ یُولَدْ ﴿٣﴾
+    #یادآور_بندگی
+    @tamakkon_ir""",
 
-وَلَمْ یَکُنْ لَهُ کُفُوًا أَحَدٌ ﴿٤﴾ '''
+        "12:00": """در میانه روز، وقتیه که دل‌هامون به یک آرامش دوباره نیاز داره.
+    بیاید چند لحظه‌ای همه با هم سوره مبارکه توحید رو تلاوت کنیم.
+    این ذکر نورانی، بهترین استراحت برای قلب و روح ماست 💫
+
+    #یادآور_بندگی
+    @tamakkon_ir""",
+
+        "16:00": """غروب که می‌شه، بهترین زمان برای تازه کردن عهد با خداست.
+    بیاید همین حالا همراه صوت سوره مبارکه توحید، همه با هم بخونیم و دل‌هامون رو روشن‌تر کنیم 🌅
+    «اللّهُ الصَّمَد»؛ او بی‌نیاز است و ما همه محتاج او 🙏
+
+    #یادآور_بندگی
+    @tamakkon_ir""",
+
+        "22:00": """پایان روز، بهترین موقع برای آرامش گرفتن از یاد خداست.
+    بیاید پیش از خواب، سوره مبارکه توحید رو با هم بخونیم.
+    این نور قرائت، بهترین همراه برای شب‌هامون خواهد بود 🌙💤
+
+    #یادآور_بندگی
+    @tamakkon_ir"""
+    }
+    
+    text = reminders[time]
+
     
     try :
         with open(tohid_audio_url ,'rb') as v :
-            await bale_bot.send_audio(bale_channel_id , v , caption= f'{text} \n با خواندن سوره توحید و هدیه به حضرت صاحب الزمان (روحی و ارواح العالمين له الفدا) از او مدد بخواهیم') 
-            await  eitaa_bot.send_file(eitaa_channel_id , v , caption= f'{text} \n با خواندن سوره توحید و هدیه به حضرت صاحب الزمان (روحی و ارواح العالمين له الفدا) از او مدد بخواهیم') 
+            await bale_bot.send_audio(bale_channel_id , v , caption= f'{text}') 
+            await  eitaa_bot.send_file(eitaa_channel_id , v , caption= f'{text}') 
             
             
             
@@ -206,12 +232,11 @@ async def send_tohid():
 
 
 async def send_salavat_8():
-    text = '''اللّهُمَّ صَلِّ عَلَى عَلِیِّ بْنِ مُوسى الرِّضا
-الْمُرْتَضَى الإِمامِ التَّقی النَّقی وَ حُجَّتِکَ
-عَلَى مَنْ فَوْقَ الْأَرْضِ وَ مَنْ تَحْتَ الثَّرى
-الصِّدِّیقِ الشَّهِیدِ صَلاةً کَثِیرَةً تَامَّةً زَاکِیَةً
-مُتَوَاصِلَةً مُتَوَاتِرَةً مُتَرَادِفَةً کَأَفْضَلِ
-مَا صَلَّیْتَ عَلَى أَحَدٍ مِنْ أَوْلِیائِکَ'''
+    text = '''✨ بیاید با صلوات خاص امام رضا (ع) دل‌هامون رو روشن کنیم 🌟
+اللهم صلّ علی علی بن موسی الرضا 🌹
+
+#یادآور_خادمی
+@tamakkon_ir'''
 
     try :
         with open(salavat_audio_url ,'rb') as v :

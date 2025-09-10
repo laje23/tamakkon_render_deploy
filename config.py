@@ -48,19 +48,30 @@ def get_state():
 
 # process messages  ........................................................
 # 🧠 پردازش پیام‌ها
-def process_hadith_message(text: str, id: int | str) -> str:
-    return f'''{text}
+def process_hadith_message(text: str, id: int | str , eitaa = False) -> str:
+    if eitaa :
+        return f'''{text} \n\nمعرفی کتاب:
+    https://eitaa.com/tamakkon_ir/19
 
-معرفی کتاب:
-https://eitaa.com/tamakkon_ir/19
+
+    دانلود کتاب:
+    https://eitaa.com/tamakkon_ir/20
+
+    #حدیث
+    #{id}
+    @tamakkon_ir'''
+
+    else :
+        return f'''{text}\n\nمعرفی کتاب:
+    https://ble.ir/tamakkon_ir/-400893920905783805/1757415117292
 
 
-دانلود کتاب:
-https://eitaa.com/tamakkon_ir/20
+    دانلود کتاب:
+    https://ble.ir/tamakkon_ir/7588061826126981347/1757415238870
 
-#حدیث
-#{id}
-@tamakkon_ir'''
+    #حدیث
+    #{id}
+    @tamakkon_ir'''        
 
 
 def process_note_message(text: str, id: int | str) -> str:
