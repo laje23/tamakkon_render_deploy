@@ -5,4 +5,3 @@ schedule
 psycopg2-binary
 pymongo
 pytz
-mimetypes

@@ -22,9 +22,9 @@ async def call_handler(callback_query):
             pass
         await bale_bot.edit_message_text(ci, mi, "منوی مدیریت پیام", message_menu())
 
-    elif t == "hadith_menu":
+    elif t == "send_menu":
         await bale_bot.edit_message_text(
-            ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", hadith_menu()
+            ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", send_menu()
         )
 
     elif t == "note_menu":
@@ -89,6 +89,18 @@ async def call_handler(callback_query):
         await bale_bot.edit_message_text(
             ci, mi, f"حدیث ها \n {hadith} \n\n یادداشت ها \n {note}", back_menu()
         )
+        
+    elif t == 'auto_send_clip':
+        e = await _send.send_auto_clip()
+        
+        await bale_bot.edit_message_text(ci , mi , e , back_menu())
+    
+    elif t == 'auto_send_book':
+        e = await _send.send_auto_book()
+        
+        await bale_bot.edit_message_text(ci , mi , e , back_menu())
+    
     elif t == "in_update":
         e =await _send.send_auto_book()
         print(e)
+        

@@ -100,7 +100,7 @@ def main_menu(is_admin: bool):
 
 def message_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("حدیث", "hadith_menu")],
+        [InlineKeyboardButton("ارسال ها", "send_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("ارسال پیام های جا مانده ", "send_laftovers")],
@@ -118,9 +118,11 @@ def note_menu():
     )
 
 
-def hadith_menu():
+def send_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("ارسال تصادفی", "auto_send_hadith")],
+        [InlineKeyboardButton("ارسال حدیث", "auto_send_hadith")],
+        [InlineKeyboardButton("ارسال کتاب", "auto_send_book")],
+        [InlineKeyboardButton("ارسال کلیپ", "auto_send_clip")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
     )
 
