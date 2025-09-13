@@ -1,20 +1,19 @@
 from config import *
 import send_message_handler as _send
 
-# from send_message_handler import auto_send_note_to_channels
-
-
 async def call_handler(callback_query):
     t = callback_query.data
     ci = callback_query.message.chat.id
     mi = callback_query.message.id
     ui = callback_query.author.id
 
+    # 🏠 بازگشت به منوی اصلی
     if t == "back_to_main":
         await bale_bot.edit_message_text(
             ci, mi, "سلام! یکی از گزینه‌ها رو انتخاب کن:", main_menu(ui in admins)
         )
 
+    # 📩 بازگشت به منوی پیام‌ها
     elif t == "back_to_message":
         try:
             callback_query.author.del_state()
@@ -22,85 +21,97 @@ async def call_handler(callback_query):
             pass
         await bale_bot.edit_message_text(ci, mi, "منوی مدیریت پیام", message_menu())
 
+    # 📤 منوی ارسال
     elif t == "send_menu":
-        await bale_bot.edit_message_text(
-            ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", send_menu()
-        )
+        await bale_bot.edit_message_text(ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", send_menu())
 
+    # 📝 منوی یادداشت‌ها
     elif t == "note_menu":
-        await bale_bot.edit_message_text(
-            ci, mi, "لطفا یک گزینه را انتخاب کنید", note_menu()
-        )
+        await bale_bot.edit_message_text(ci, mi, "لطفا یک گزینه را انتخاب کنید", note_menu())
 
-    elif t == "auto_send_hadith":
-        await bale_bot.edit_message_text(ci, mi, "در حال ارسال...")
-        text = await _send.auto_send_hadith()
-        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+    # 📚 منوی کتاب‌ها
+    elif t == "book_menu":
+        await bale_bot.edit_message_text(ci, mi, "منوی معرفی کتاب", book_menu())
 
+    # 📊 دریافت آمار
     elif t == "get_status":
-        
         book = db_books.get_status()
         clip = db_clips.get_status()
         hadith = db_hadith.get_status()
         note = db_notes.get_status()
 
-        text = f'''آمار کلی سیستم:
-    .............................
-    کتاب‌ها
-        ارسال شده: {book['sent']}
-        ارسال نشده: {book['unsent']}
+        text = f"""آمار کلی سیستم:
+.............................
+کتاب‌ها
+    ارسال شده: {book['sent']}
+    ارسال نشده: {book['unsent']}
 
-    کلیپ‌ها
-        ارسال شده: {clip['sent']}
-        ارسال نشده: {clip['unsent']}
+کلیپ‌ها
+    ارسال شده: {clip['sent']}
+    ارسال نشده: {clip['unsent']}
 
-    احادیث
-        ارسال شده: {hadith['sent']}
-        ارسال نشده: {hadith['unsent']}
+احادیث
+    ارسال شده: {hadith['sent']}
+    ارسال نشده: {hadith['unsent']}
 
-    یادداشت‌ها
-        ارسال شده: {note['sent']}
-        ارسال نشده: {note['unsent']}
-    '''
-    
-        await bale_bot.edit_message_text(ci , mi , text , back_menu())
+یادداشت‌ها
+    ارسال شده: {note['sent']}
+    ارسال نشده: {note['unsent']}
+"""
+        await bale_bot.edit_message_text(ci, mi, text, back_menu())
 
-
+    # 🔄 ارسال خودکار
+    elif t == "auto_send_hadith":
+        await bale_bot.edit_message_text(ci, mi, "در حال ارسال...")
+        text = await _send.auto_send_hadith()
+        await bale_bot.edit_message_text(ci, mi, text, back_menu())
 
     elif t == "auto_send_note":
         await bale_bot.edit_message_text(ci, mi, "در حال ارسال...")
         text = await _send.auto_send_not()
         await bale_bot.edit_message_text(ci, mi, text, back_menu())
 
+    elif t == "auto_send_clip":
+        text = await _send.send_auto_clip()
+        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+
+    elif t == "auto_send_book":
+        text = await _send.send_auto_book()
+        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+
+    elif t == "in_update":
+        text = await _send.send_auto_book()
+        print(text)
+
+    # 🧾 ذخیره یادداشت
     elif t == "save_note":
         callback_query.author.set_state("INPUT_NUMBER_NOTE")
         await bale_bot.send_message(ci, "شماره یادداشت رو وارد کنید", back_menu())
+
+    # ✏️ ویرایش یادداشت
     elif t == "edit_note":
         callback_query.author.set_state("INPUT_EDIT_NUMBER_NOTE")
         await bale_bot.send_message(ci, "شماره یادداشت رو وارد کنید", back_menu())
 
+    # 📚 ذخیره کتاب
+    elif t == "save_book":
+        callback_query.author.set_state("INPUT_BOOK_TITLE")
+        await bale_bot.send_message(ci, "عنوان کتاب رو وارد کنید", back_menu())
+
+    # ✏️ ویرایش کتاب
+    elif t == "edit_book":
+        callback_query.author.set_state("EDIT_BOOK_ID")
+        await bale_bot.send_message(ci, "شناسه کتاب رو وارد کنید", back_menu())
+
+    # 📤 ارسال پیام به کانال
     elif t == "send_to_channel":
-        await bale_bot.send_message(ci, "پیام را ارسال یا فوروارد کنید ")
+        await bale_bot.send_message(ci, "پیام را ارسال یا فوروارد کنید")
         callback_query.author.set_state("SEND_MESSAGE_TO_CHANEL")
 
+    # 🧹 ارسال باقی‌مانده‌ها
     elif t == "send_laftovers":
         hadith = await _send.send_laftover_hadith()
         note = await _send.send_laftover_note()
         await bale_bot.edit_message_text(
-            ci, mi, f"حدیث ها \n {hadith} \n\n یادداشت ها \n {note}", back_menu()
+            ci, mi, f"حدیث‌ها:\n{hadith}\n\nیادداشت‌ها:\n{note}", back_menu()
         )
-        
-    elif t == 'auto_send_clip':
-        e = await _send.send_auto_clip()
-        
-        await bale_bot.edit_message_text(ci , mi , e , back_menu())
-    
-    elif t == 'auto_send_book':
-        e = await _send.send_auto_book()
-        
-        await bale_bot.edit_message_text(ci , mi , e , back_menu())
-    
-    elif t == "in_update":
-        e =await _send.send_auto_book()
-        print(e)
-        

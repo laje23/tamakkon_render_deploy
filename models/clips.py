@@ -65,10 +65,7 @@ class ClipsTable:
         self.cursor.execute("SELECT COUNT(*) FROM clips WHERE sent > 0")
         sent_count = self.cursor.fetchone()[0]
 
-        return {
-            "sent": sent_count,
-            "unsent": unsent_count
-        }
+        return {"sent": sent_count, "unsent": unsent_count}
 
 
 # توابع بیرون کلاس برای استفاده راحت‌تر
@@ -79,7 +76,7 @@ def create_table():
         db._create_table()
 
 
-def save_file_id(file_id, caption):
+def save_clip(file_id, caption):
     with ClipsTable() as db:
         db.insert_row(file_id, caption)
 

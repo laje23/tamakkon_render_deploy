@@ -18,7 +18,6 @@ class EitaaBot:
                 return True
             return False
 
-
     async def send_file(self, chat_id: int, file, caption=""):
         url = f"{self.eitaa_base_url}/sendFile"
         payload = {
@@ -40,4 +39,3 @@ class EitaaBot:
 
         dic = res.json()
         return dic.get("ok") == "true"
-

@@ -75,10 +75,7 @@ class HadithTableManager:
         self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 1")
         sent_count = self.cursor.fetchone()[0]
 
-        return {
-            "sent": sent_count,
-            "unsent": unsent_count
-        }
+        return {"sent": sent_count, "unsent": unsent_count}
 
 
 # 🔹 توابع بیرون کلاس

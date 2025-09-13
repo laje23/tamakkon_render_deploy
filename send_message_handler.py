@@ -1,7 +1,7 @@
 from config import *
 from utils import *
 import asyncio
-from models import clips , books
+from models import clips, books
 
 
 async def send_to_debugger(err_text):
@@ -246,24 +246,28 @@ async def send_day_info():
 
 
 async def send_auto_clip():
-    id ,file_id , text  =clips.auto_return_file_id()
-    bin_fil = await file_id_to_bynery(file_id , bale_bot)
-    
-    try: 
-        bale = await bale_bot.send_video(bale_channel_id , bin_fil.read() ,caption=(text or ''))
-        eitaa = await eitaa_bot.send_file(eitaa_channel_id , bin_fil , caption=(text or ''))
-        
+    id, file_id, text = clips.auto_return_file_id()
+    bin_fil = await file_id_to_bynery(file_id, bale_bot)
+
+    try:
+        bale = await bale_bot.send_video(
+            bale_channel_id, bin_fil.read(), caption=(text or "")
+        )
+        eitaa = await eitaa_bot.send_file(
+            eitaa_channel_id, bin_fil, caption=(text or "")
+        )
+
         if not (bale and eitaa):
             raise Exception("پیام در بله یا ایتا ارسال نشد!")
 
         clips.mark_clip_sent(id)
     except Exception as e:
         return e
-        
-        
+
+
 async def send_auto_book():
     book = books.get_unsent_book()
-    text =  f"""
+    text = f"""
 📖 کتاب امروز
 
 «{book['title']}» نوشته‌ی {book['author']}، منتشر شده توسط {book['publisher'] or 'ناشر نامشخص'}.
@@ -273,20 +277,15 @@ async def send_auto_book():
 
 این کتاب نگاهی آرام و اندیشمندانه به مفاهیم معنوی و ظهور حضرت مهدی (عج) است. اگر اهل تأمل هستید، شاید این چند صفحه برایتان الهام‌بخش باشد.
 
-#کتاب #مطالعه #معنویت
+#کتاب #مطالعه #{book['id']}
 """
-    try :
-        bale = await bale_bot.send_message(bale_channel_id , text )
-        eitaa = await eitaa_bot.send_message(eitaa_channel_id , text)
-        
+    try:
+        bale = await bale_bot.send_message(bale_channel_id, text)
+        eitaa = await eitaa_bot.send_message(eitaa_channel_id, text)
+
         if not (bale and eitaa):
             raise Exception("پیام در بله یا ایتا ارسال نشد!")
 
-        books.mark_book_sent(book['id'])
+        books.mark_book_sent(book["id"])
     except Exception as e:
         return e
-
-
-    
-    
-    

@@ -20,15 +20,17 @@ async def get_media_bytes(message, bot) -> bytes | None:
     if file_id is None:
         return False
 
-    bio= file_id_to_bynery(file_id , bot)
+    bio = file_id_to_bynery(file_id, bot)
     bin_file = bio.read()
-    return bin_file , type_file
+    return bin_file, type_file
 
-async def file_id_to_bynery(file_id , bot):
+
+async def file_id_to_bynery(file_id, bot):
     content = await bot.download(file_id)
     bio = io.BytesIO(content)
     bio.seek(0)
-    return bio 
+    return bio
+
 
 def get_mentioning_the_day():
     daily_data = {

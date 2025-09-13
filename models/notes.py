@@ -15,114 +15,99 @@ class NoteTableManager:
         self.conn.close()
 
     def create_table(self):
-        self.cursor.execute(
-            """
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY,
                 content TEXT DEFAULT NULL,
                 sent INTEGER DEFAULT 0 CHECK (sent IN (0,1))
             );
-            """
-        )
+        """)
 
-    def insert_content_and_id(self, content, id):
+    def insert_note(self, note_id, content):
         self.cursor.execute(
             "INSERT INTO notes (id, content) VALUES (%s, %s)",
-            (id, content),
+            (note_id, content),
         )
 
-    def check_id_exist(self, id):
+    def note_exists(self, note_id):
         self.cursor.execute(
             "SELECT EXISTS(SELECT 1 FROM notes WHERE id = %s)",
-            (id,),
+            (note_id,),
         )
         return self.cursor.fetchone()[0]
 
-    def return_auto_content(self):
+    def get_unsent_note(self):
         self.cursor.execute(
             "SELECT content, id FROM notes WHERE sent = 0 ORDER BY id LIMIT 1"
         )
         return self.cursor.fetchone()
 
-    def update_sent_to_1(self, id, content=None):
+    def mark_note_sent(self, note_id, content=None):
         if content:
             self.cursor.execute(
                 "UPDATE notes SET sent = 1 WHERE id = %s OR content = %s",
-                (id, content),
+                (note_id, content),
             )
         else:
             self.cursor.execute(
                 "UPDATE notes SET sent = 1 WHERE id = %s",
-                (id,),
+                (note_id,),
             )
 
-    def count_sent_status(self):
-        self.cursor.execute(
-            "SELECT COUNT(*) FROM notes WHERE sent = 1"
-        )
-        sent_count = self.cursor.fetchone()[0]
-
-        self.cursor.execute(
-            "SELECT COUNT(*) FROM notes WHERE sent = 0"
-        )
-        unsent_count = self.cursor.fetchone()[0]
-
-        return {
-            "sent": sent_count,
-            "unsent": unsent_count
-        }
-    
-    def return_sent(self, id):
+    def is_note_sent(self, note_id):
         self.cursor.execute(
             "SELECT sent FROM notes WHERE id = %s",
-            (id,),
+            (note_id,),
         )
         result = self.cursor.fetchone()
-        return result[0] if result else None
+        return result[0] == 1 if result else False
 
-    def update_content(self, id, content):
+    def update_note_content(self, note_id, content):
         self.cursor.execute(
             "UPDATE notes SET content = %s WHERE id = %s",
-            (content, id),
+            (content, note_id),
         )
 
+    def get_sent_stats(self):
+        self.cursor.execute("SELECT COUNT(*) FROM notes WHERE sent = 1")
+        sent = self.cursor.fetchone()[0]
 
-# توابع بیرون کلاس
+        self.cursor.execute("SELECT COUNT(*) FROM notes WHERE sent = 0")
+        unsent = self.cursor.fetchone()[0]
+
+        return {"sent": sent, "unsent": unsent}
+
+
+# توابع سطح بالا
 
 def create_table():
     with NoteTableManager() as db:
         db.create_table()
 
-
-def save_note(id, content):
+def save_note(note_id, content):
     with NoteTableManager() as db:
-        db.insert_content_and_id(content, id)
+        db.insert_note(note_id, content)
 
-
-def check_is_exist(id):
+def check_is_exist(note_id):
     with NoteTableManager() as db:
-        return db.check_id_exist(id)
-
+        return db.note_exists(note_id)
 
 def auto_return_content():
     with NoteTableManager() as db:
-        return db.return_auto_content()
+        return db.get_unsent_note()
 
-
-def mark_sent(id=0, content=""):
+def mark_sent(note_id=0, content=""):
     with NoteTableManager() as db:
-        db.update_sent_to_1(id, content)
+        db.mark_note_sent(note_id, content)
 
-def return_sent(id):
+def edit_content(note_id, content):
     with NoteTableManager() as db:
-        return db.return_sent(id)
-
-
-def edit_content(id, content):
-    with NoteTableManager() as db:
-        db.update_content(id, content)
-
+        db.update_note_content(note_id, content)
 
 def get_status():
     with NoteTableManager() as db:
-        return db.count_sent_status()
+        return db.get_sent_stats()
+
+def is_note_sent(note_id: int) -> bool:
+    with NoteTableManager() as db:
+        return db.is_note_sent(note_id)

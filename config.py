@@ -3,7 +3,7 @@ from balethon import Client
 from app_manager import EitaaBot
 from models import hadith as db_hadith
 from models import notes as db_notes
-from models import clips as db_clips 
+from models import clips as db_clips
 from models import books as db_books
 import asyncio
 import threading
@@ -18,7 +18,7 @@ eitaa_bot = EitaaBot(os.getenv("EITAA_BOT_TOKEN"))
 debugger_id = os.getenv("DEBUGER_ID")
 
 group_reserch_hadith_id = int(os.getenv("RESERCH_HADITH"))
-group_reserch_clip_id = int(os.getenv('RESERCH_CLIP_ID'))
+group_reserch_clip_id = int(os.getenv("RESERCH_CLIP_ID"))
 
 bale_channel_id = int(os.getenv("CHANNEL_BALE"))
 eitaa_channel_id = int(os.getenv("CHANNEL_EITAA"))
@@ -102,6 +102,7 @@ def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("ارسال ها", "send_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
+        [InlineKeyboardButton("کتاب ها", "book_menu")],
         [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("ارسال پیام های جا مانده ", "send_laftovers")],
         [InlineKeyboardButton("گرفتن آمار", "get_status")],
@@ -111,18 +112,34 @@ def message_menu():
 
 def note_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton(" ارسال یادداشت", "auto_send_note")],
         [InlineKeyboardButton("یادداشت جدید ", "save_note")],
         [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
     )
 
 
+def book_menu():
+    return InlineKeyboard(
+        [InlineKeyboardButton("کتاب جدید ", "save_book")],
+        [InlineKeyboardButton("ویرایش", "edit_book")],
+        [InlineKeyboardButton("بازگشت", "back_to_message")],
+    )
+
+
+def save_or_edit_menu():
+    return InlineKeyboard(
+        [InlineKeyboardButton("یادداشت", "note_menu")],
+        [InlineKeyboardButton("کتاب", "book_menu")],
+        [InlineKeyboardButton("بازگشت", "back_to_message")],
+    )
+
+
 def send_menu():
     return InlineKeyboard(
-        [InlineKeyboardButton("ارسال حدیث", "auto_send_hadith")],
-        [InlineKeyboardButton("ارسال کتاب", "auto_send_book")],
-        [InlineKeyboardButton("ارسال کلیپ", "auto_send_clip")],
+        [InlineKeyboardButton("حدیث", "auto_send_hadith")],
+        [InlineKeyboardButton("یادداشت", "auto_send_note")],
+        [InlineKeyboardButton("کتاب", "auto_send_book")],
+        [InlineKeyboardButton("کلیپ", "auto_send_clip")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
     )
 
@@ -134,7 +151,7 @@ def answer_y_n(id):
     )
 
 
-def edit_menu():
+def edit_note_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
