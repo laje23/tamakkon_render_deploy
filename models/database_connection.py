@@ -11,7 +11,7 @@ def get_connection():
             user=os.getenv("PGUSER"),
             password=os.getenv("PGPASSWORD"),
             host=os.getenv("PGHOST"),
-            port=os.getenv("PGPORT")
+            port=os.getenv("PGPORT"),
         )
     except psycopg2.Error as e:
         print("connection to db fail : ", e)

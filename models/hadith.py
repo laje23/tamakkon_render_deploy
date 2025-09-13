@@ -1,6 +1,7 @@
 from models.database_connection import get_connection
 
-class HadithTabelManager:
+
+class HadithTableManager:
     def __init__(self):
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
@@ -14,135 +15,100 @@ class HadithTabelManager:
         self.conn.close()
 
     def create_table(self):
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS hadith (
                 id SERIAL PRIMARY KEY,
                 message_id INTEGER DEFAULT NULL,
                 content TEXT DEFAULT NULL,
-                sent_bale INTEGER DEFAULT 0,
-                sent_eitaa INTEGER DEFAULT 0
+                sent INTEGER DEFAULT 0 CHECK (sent IN (0,1))
             );
-        """)
+            """
+        )
 
-    def insert_row(self , message_id , content ):
+    def insert_row(self, message_id, content):
+        # گرفتن کمترین مقدار sent از جدول
+        self.cursor.execute("SELECT MIN(sent) FROM hadith")
+        min_sent = self.cursor.fetchone()[0]
+
+        # اگر جدول خالی بود، مقدار اولیه رو صفر بذار
+        if min_sent is None:
+            min_sent = 0
+
+        # درج رکورد جدید با مقدار sent برابر با کمترین مقدار موجود
         self.cursor.execute(
-            'INSERT INTO hadith (message_id , content) VALUES (%s,%s) ',
-            (message_id , content)
-            
+            "INSERT INTO hadith (message_id, content, sent) VALUES (%s, %s, %s)",
+            (message_id, content, min_sent),
         )
 
     def update_content(self, message_id, new_content):
         self.cursor.execute(
-            'UPDATE hadith SET content = %s WHERE message_id = %s',
-            (new_content, message_id)
+            "UPDATE hadith SET content = %s WHERE message_id = %s",
+            (new_content, message_id),
         )
 
-    def update_sent_bale_to_1(self, id, content):
+    def update_sent_to_1(self, id, content):
         self.cursor.execute(
-            'UPDATE hadith SET sent_bale = %s WHERE id = %s OR content = %s',
-            (1, id, content)
-        )
-    
-    def update_sent_eitaa_to_1(self, id, content):
-        self.cursor.execute(
-            'UPDATE hadith SET sent_eitaa = %s WHERE id = %s OR content = %s',
-            (1, id, content)
-        )
-    
-    def select_leftover_bale(self):
-        self.cursor.execute(
-            'SELECT content,id FROM hadith WHERE sent_bale = 0 AND sent_eitaa = 1'
-        )
-        content = self.cursor.fetchall()
-        return content if content else None 
-    
-    def select_leftover_eitaa(self):
-        self.cursor.execute(
-            'SELECT content,id FROM hadith WHERE sent_bale = 1 AND sent_eitaa = 0'
-        )
-        content = self.cursor.fetchall()
-        return content if content else None 
-
-    def update_sent_all_to_1(self, id, content):
-        self.cursor.execute(
-            'UPDATE hadith SET sent_eitaa = %s , sent_bale = %s WHERE id = %s OR content = %s',
-            (1,1, id, content)
+            "UPDATE hadith SET sent = 1 WHERE id = %s OR content = %s",
+            (id, content),
         )
 
-    def count_sent_status(self):
-        self.cursor.execute("""
-            SELECT
-                SUM(CASE WHEN sent_bale = 1 THEN 1 ELSE 0 END) AS bale_count,
-                SUM(CASE WHEN sent_eitaa = 1 THEN 1 ELSE 0 END) AS eitaa_count
+    def select_unsent(self):
+        self.cursor.execute(
+            """
+            SELECT content, id
             FROM hadith
-        """)
-        result = self.cursor.fetchone()
-        return result[0], result[1]
-    
-    def auto_select_content(self) :
-        self.cursor.execute(
-            'SELECT content , id FROM hadith WHERE sent_bale = 0 AND sent_eitaa = 0 ORDER BY id '
+            WHERE sent = (
+                SELECT MIN(sent) FROM hadith
+            )
+            ORDER BY RANDOM()
+            LIMIT 1
+            """
         )
         return self.cursor.fetchone()
 
+    # تابع آمار تعداد ارسال شده و ارسال نشده
+    def get_status_counts(self):
+        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 0")
+        unsent_count = self.cursor.fetchone()[0]
+
+        self.cursor.execute("SELECT COUNT(*) FROM hadith WHERE sent = 1")
+        sent_count = self.cursor.fetchone()[0]
+
+        return {
+            "sent": sent_count,
+            "unsent": unsent_count
+        }
+
+
+# 🔹 توابع بیرون کلاس
 
 
 def create_table():
-    with HadithTabelManager() as db :
+    with HadithTableManager() as db:
         db.create_table()
-    return
 
 
-
-def save_id_and_content(message_id , content):
-    with HadithTabelManager() as db :
-        db.insert_row(message_id , content)
-    return
-        
+def save_id_and_content(message_id, content):
+    with HadithTableManager() as db:
+        db.insert_row(message_id, content)
 
 
-
-def edit_content(message_id , new_content):
-    with HadithTabelManager() as db :
-        db.update_content(message_id , new_content)
-    return
+def edit_content(message_id, new_content):
+    with HadithTableManager() as db:
+        db.update_content(message_id, new_content)
 
 
 def return_auto_content():
-    with HadithTabelManager() as db : 
-        return db.auto_select_content()
+    with HadithTableManager() as db:
+        return db.select_unsent()
 
 
-def mark_sent_bale(id = 0 , content = ''):
-    with HadithTabelManager() as db : 
-        db.update_sent_bale_to_1(id , content)
-    return 
-
-def mark_sent_eitaa(id = 0 , content = ''):
-    with HadithTabelManager() as db : 
-        db.update_sent_eitaa_to_1(id , content)
-    return
-
-def mark_sent_all(id = 0 , content = ''):
-    with HadithTabelManager() as db : 
-        db.update_sent_all_to_1(id , content)
-    return
+def mark_sent(id=0, content=""):
+    with HadithTableManager() as db:
+        db.update_sent_to_1(id, content)
 
 
-def return_bale_laftover():
-    with HadithTabelManager() as db : 
-        return db.select_leftover_bale()
-
-def return_eitaa_laftover():
-    with HadithTabelManager() as db : 
-        return db.select_leftover_eitaa()
-    
-
-def count_sent_all():
-    with HadithTabelManager() as db:
-        bale, eitaa = db.count_sent_status()
-        return f"""حدیث‌ها:
-
-در بله: {bale}
-در ایتا: {eitaa}"""
-    
+def get_status():
+    with HadithTableManager() as db:
+        return db.get_status_counts()
