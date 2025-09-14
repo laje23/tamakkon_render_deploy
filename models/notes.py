@@ -15,13 +15,15 @@ class NoteTableManager:
         self.conn.close()
 
     def create_table(self):
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY,
                 content TEXT DEFAULT NULL,
                 sent INTEGER DEFAULT 0 CHECK (sent IN (0,1))
             );
-        """)
+        """
+        )
 
     def insert_note(self, note_id, content):
         self.cursor.execute(
@@ -80,33 +82,41 @@ class NoteTableManager:
 
 # توابع سطح بالا
 
+
 def create_table():
     with NoteTableManager() as db:
         db.create_table()
+
 
 def save_note(note_id, content):
     with NoteTableManager() as db:
         db.insert_note(note_id, content)
 
+
 def check_is_exist(note_id):
     with NoteTableManager() as db:
         return db.note_exists(note_id)
+
 
 def auto_return_content():
     with NoteTableManager() as db:
         return db.get_unsent_note()
 
+
 def mark_sent(note_id=0, content=""):
     with NoteTableManager() as db:
         db.mark_note_sent(note_id, content)
+
 
 def edit_content(note_id, content):
     with NoteTableManager() as db:
         db.update_note_content(note_id, content)
 
+
 def get_status():
     with NoteTableManager() as db:
         return db.get_sent_stats()
+
 
 def is_note_sent(note_id: int) -> bool:
     with NoteTableManager() as db:

@@ -97,6 +97,3 @@ def get_mentioning_the_day():
         "date": date_str,
         "path": url,
     }
-
-
-

@@ -64,33 +64,41 @@ async def send_to_channel(message):
 async def handle_book_title(message):
     await input_book_title(message)
 
+
 @bale_bot.on_message(at_state("INPUT_BOOK_AUTHOR"))
 async def handle_book_author(message):
     await input_book_author(message)
+
 
 @bale_bot.on_message(at_state("INPUT_BOOK_PUBLISHER"))
 async def handle_book_publisher(message):
     await input_book_publisher(message)
 
+
 @bale_bot.on_message(at_state("INPUT_BOOK_EXCERPT"))
 async def handle_book_excerpt(message):
     await input_book_excerpt(message)
+
 
 @bale_bot.on_message(at_state("EDIT_BOOK_ID"))
 async def handle_book_id_edit(message):
     await input_book_id_for_edit(message)
 
+
 @bale_bot.on_message(at_state("EDIT_BOOK_TITLE"))
 async def handle_book_title_edit(message):
     await input_new_title(message)
+
 
 @bale_bot.on_message(at_state("EDIT_BOOK_AUTHOR"))
 async def handle_book_author_edit(message):
     await input_new_author(message)
 
+
 @bale_bot.on_message(at_state("EDIT_BOOK_PUBLISHER"))
 async def handle_book_publisher_edit(message):
     await input_new_publisher(message)
+
 
 @bale_bot.on_message(at_state("EDIT_BOOK_EXCERPT"))
 async def handle_book_excerpt_edit(message):

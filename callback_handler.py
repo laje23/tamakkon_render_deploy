@@ -1,6 +1,7 @@
 from config import *
 import send_message_handler as _send
 
+
 async def call_handler(callback_query):
     t = callback_query.data
     ci = callback_query.message.chat.id
@@ -23,11 +24,15 @@ async def call_handler(callback_query):
 
     # 📤 منوی ارسال
     elif t == "send_menu":
-        await bale_bot.edit_message_text(ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", send_menu())
+        await bale_bot.edit_message_text(
+            ci, mi, "لطفا یک گزینه برای ارسال انتخاب کنید", send_menu()
+        )
 
     # 📝 منوی یادداشت‌ها
     elif t == "note_menu":
-        await bale_bot.edit_message_text(ci, mi, "لطفا یک گزینه را انتخاب کنید", note_menu())
+        await bale_bot.edit_message_text(
+            ci, mi, "لطفا یک گزینه را انتخاب کنید", note_menu()
+        )
 
     # 📚 منوی کتاب‌ها
     elif t == "book_menu":

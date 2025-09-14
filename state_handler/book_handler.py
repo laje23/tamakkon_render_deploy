@@ -27,6 +27,7 @@ MSG_BOOK_EDIT_ERROR = "❌ خطا در ویرایش کتاب: "
 
 # 🟢 ثبت کتاب جدید
 
+
 async def input_book_title(message):
     user_id = message.author.id
     user_temp_data[user_id] = {"title": message.text.strip()}
@@ -63,7 +64,9 @@ async def input_book_excerpt(message):
         )
         await bale_bot.send_message(message.chat.id, MSG_BOOK_SAVED, back_menu())
     except Exception as e:
-        await bale_bot.send_message(message.chat.id, f"{MSG_BOOK_ERROR}{str(e)}", back_menu())
+        await bale_bot.send_message(
+            message.chat.id, f"{MSG_BOOK_ERROR}{str(e)}", back_menu()
+        )
 
     user_temp_data.pop(user_id, None)
     message.author.del_state()
@@ -71,10 +74,13 @@ async def input_book_excerpt(message):
 
 # ✏️ ویرایش کتاب موجود
 
+
 async def input_book_id_for_edit(message):
     book_id_text = message.text.strip()
     if not book_id_text.isdigit():
-        await bale_bot.send_message(message.chat.id, "لطفاً فقط عدد وارد کن.", back_menu())
+        await bale_bot.send_message(
+            message.chat.id, "لطفاً فقط عدد وارد کن.", back_menu()
+        )
         return
 
     book_id = int(book_id_text)
@@ -132,7 +138,9 @@ async def input_new_excerpt(message):
         )
         await bale_bot.send_message(message.chat.id, MSG_BOOK_EDITED, back_menu())
     except Exception as e:
-        await bale_bot.send_message(message.chat.id, f"{MSG_BOOK_EDIT_ERROR}{str(e)}", back_menu())
+        await bale_bot.send_message(
+            message.chat.id, f"{MSG_BOOK_EDIT_ERROR}{str(e)}", back_menu()
+        )
 
     user_temp_data.pop(user_id, None)
     message.author.del_state()

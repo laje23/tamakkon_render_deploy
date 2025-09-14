@@ -2,9 +2,9 @@ from config import *
 
 
 def fa_to_en_int(num):
-    fa_digits = '۰۱۲۳۴۵۶۷۸۹'
-    en_digits = '0123456789'
-    result = ''
+    fa_digits = "۰۱۲۳۴۵۶۷۸۹"
+    en_digits = "0123456789"
+    result = ""
     for ch in str(num):
         if ch in fa_digits:
             result += en_digits[fa_digits.index(ch)]
@@ -13,7 +13,6 @@ def fa_to_en_int(num):
         else:
             continue  # یا raise ValueError برای کاراکترهای نامعتبر
     return int(result)
-
 
 
 # پیام‌های ثابت
@@ -29,7 +28,7 @@ MSG_NOTE_EDITED = "یادداشت ویرایش شد."
 
 async def first_step_save(message):
     note_number = fa_to_en_int(message.text)
-    
+
     if note_number <= 0:
         await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
         return
@@ -38,13 +37,14 @@ async def first_step_save(message):
         # به جای حذف state، مستقیم وارد حالت ویرایش شو
         user_temp_data[message.author.id] = {"note_edit_number": note_number}
         message.author.set_state("INPUT_EDIT_TEXT_NOTE")
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_EXISTS + "\n" + MSG_ENTER_NOTE_TEXT, back_menu())
+        await bale_bot.send_message(
+            message.chat.id, MSG_NOTE_EXISTS + "\n" + MSG_ENTER_NOTE_TEXT, back_menu()
+        )
         return
 
     user_temp_data[message.author.id] = {"note_number": note_number}
     message.author.set_state("INPUT_TEXT_NOTE")
     await bale_bot.send_message(message.chat.id, MSG_ENTER_NOTE_TEXT)
-
 
 
 async def next_step_save(message):
@@ -67,14 +67,16 @@ async def next_step_save(message):
 
 async def first_state_edit(message):
     note_number = fa_to_en_int(message.text)
-    
+
     if note_number <= 0:
         await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
         return
 
     if not db_notes.check_is_exist(int(note_number)):
         message.author.del_state()
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_DOES_NOT_EXIST, back_menu())
+        await bale_bot.send_message(
+            message.chat.id, MSG_NOTE_DOES_NOT_EXIST, back_menu()
+        )
         return
 
     if db_notes.is_note_sent(note_number):
@@ -92,7 +94,7 @@ async def next_state_edit(message):
 
     try:
         db_notes.edit_content(note_id, message.text)
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_EDITED , back_menu())
+        await bale_bot.send_message(message.chat.id, MSG_NOTE_EDITED, back_menu())
     except Exception as e:
         await bale_bot.send_message(message.chat.id, str(e))
 
