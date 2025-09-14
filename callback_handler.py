@@ -68,25 +68,24 @@ async def call_handler(callback_query):
     # 🔄 ارسال خودکار
     elif t == "auto_send_hadith":
         await bale_bot.edit_message_text(ci, mi, "در حال ارسال...")
-        text = await _send.auto_send_hadith()
-        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+        result = await _send.auto_send_hadith()
+        await bale_bot.send_message(ci, result["message"], back_menu())
 
     elif t == "auto_send_note":
         await bale_bot.edit_message_text(ci, mi, "در حال ارسال...")
-        text = await _send.auto_send_not()
-        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+        result = await _send.auto_send_not()
+        await bale_bot.send_message(ci, result["message"], back_menu())
 
     elif t == "auto_send_clip":
-        text = await _send.send_auto_clip()
-        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+        result = await _send.send_auto_clip()
+        await bale_bot.send_message(ci, result["message"], back_menu())
 
     elif t == "auto_send_book":
-        text = await _send.send_auto_book()
-        await bale_bot.edit_message_text(ci, mi, text, back_menu())
+        result = await _send.send_auto_book()
+        await bale_bot.send_message(ci, result["message"], back_menu())
 
     elif t == "in_update":
-        text = await _send.send_auto_book()
-        print(text)
+        pass
 
     # 🧾 ذخیره یادداشت
     elif t == "save_note":
@@ -117,6 +116,13 @@ async def call_handler(callback_query):
     elif t == "send_laftovers":
         hadith = await _send.send_laftover_hadith()
         note = await _send.send_laftover_note()
-        await bale_bot.edit_message_text(
-            ci, mi, f"حدیث‌ها:\n{hadith}\n\nیادداشت‌ها:\n{note}", back_menu()
-        )
+
+        text = f"""📤 گزارش ارسال باقی‌مانده‌ها:
+
+📜 احادیث:
+{hadith["message"]}
+
+📝 یادداشت‌ها:
+{note["message"]}
+"""
+        await bale_bot.send_message(ci, text, back_menu())

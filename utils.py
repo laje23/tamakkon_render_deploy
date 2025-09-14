@@ -32,7 +32,7 @@ async def file_id_to_bynery(file_id, bot):
     return bio
 
 
-def get_mentioning_the_day():
+def get_mentioning_day():
     daily_data = {
         "Saturday": {
             "fa": "شنبه",
@@ -96,4 +96,23 @@ def get_mentioning_the_day():
         "zekr": zekr,
         "date": date_str,
         "path": url,
+    }
+
+
+# utils/response.py
+
+
+def success_response(message="", data=None):
+    return {
+        "success": True,
+        "message": message,
+        "data": data,
+    }
+
+
+def error_response(message="", data=None):
+    return {
+        "success": False,
+        "message": message,
+        "data": data,
     }

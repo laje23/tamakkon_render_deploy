@@ -1,61 +1,70 @@
 from config import *
-from utils import *
-import asyncio
-from models import clips, books
+from utils import (
+    success_response,
+    error_response,
+    get_media_bytes,
+    file_id_to_bynery,
+    get_mentioning_day,
+)
 
 
-async def send_to_debugger(err_text):
-    if err_text:
-        if err_text != " پیام ارسال شد":
-            await bale_bot.send_message(debugger_id, err_text)
+# 📌 لاگ‌گیری فقط در صورت شکست
+async def send_to_debugger(result, chat_id=None):
+    if isinstance(result, dict) and not result.get("success", True):
+        message = result.get("message", "خطای نامشخص")
+        target = chat_id or debugger_id
+        try:
+            await bale_bot.send_message(target, message)
+        except Exception as e:
+            print(f"[Debugger Error] ارسال پیام به دیباگر شکست خورد:\n{e}")
 
 
+# 📤 ارسال حدیث خودکار
 async def auto_send_hadith():
     result = db_hadith.return_auto_content()
     if not result:
-        return "هیچ پیامی موجود نیست"
+        return error_response("هیچ پیامی موجود نیست")
 
     content, id = result
 
     if not os.path.exists(hadith_photo_url):
-        return f"عکس موجود نیست: {hadith_photo_url}"
+        return error_response(f"عکس موجود نیست: {hadith_photo_url}")
 
     try:
         with open(hadith_photo_url, "rb") as photo:
-            bale = await bale_bot.send_photo(
+            await bale_bot.send_photo(
                 bale_channel_id, photo, process_hadith_message(content, id)
             )
-            eitaa = await eitaa_bot.send_file(
+            await eitaa_bot.send_file(
                 eitaa_channel_id, photo, process_hadith_message(content, id, True)
             )
 
-        if not (bale and eitaa):
-            raise Exception("حدیث در بله یا ایتا ارسال نشد!")
-
         db_hadith.mark_sent(id)
-
+        return success_response("حدیث ارسال شد")
     except Exception as e:
-        return f" ارور :\n {e}"
+        return error_response(f"ارور در ارسال حدیث:\n{e}")
 
 
+# 📤 ارسال یادداشت خودکار
 async def auto_send_not():
     result = db_notes.auto_return_content()
     if not result:
-        return "هیچ پیامی موجود نیست"
+        return error_response("هیچ پیامی موجود نیست")
+
     content, id = result
     text = process_note_message(content, id)
+
     try:
-        bale = await bale_bot.send_message(bale_channel_id, text)
-        eitaa = await eitaa_bot.send_message(eitaa_channel_id, text)
-        if not (bale and eitaa):
-            raise Exception("حدیث در بله یا ایتا ارسال نشد!")
+        await bale_bot.send_message(bale_channel_id, text)
+        await eitaa_bot.send_message(eitaa_channel_id, text)
 
         db_notes.mark_sent(id)
-
+        return success_response("یادداشت ارسال شد")
     except Exception as e:
-        return f" ارور :\n {e}"
+        return error_response(f"ارور در ارسال یادداشت:\n{e}")
 
 
+# 📤 ارسال پیام به کانال
 async def send_message_to_channel(message, bot):
     if x := await get_media_bytes(message, bot):
         bin_file, typefile = x
@@ -64,153 +73,133 @@ async def send_message_to_channel(message, bot):
                 await bale_bot.send_photo(bale_channel_id, bin_file, message.caption)
             elif typefile == "video":
                 await bale_bot.send_video(bale_channel_id, bin_file, message.caption)
-            # elif typefile == 'voice':
-            #     await bale_bot.send_voice(bale_channel_id , bin_file , message.caption )
             elif typefile == "audio":
                 await bale_bot.send_audio(bale_channel_id, bin_file, message.caption)
 
             await eitaa_bot.send_file(eitaa_channel_id, bin_file, message.caption)
-            return "پیام ارسال شد"
+            return success_response("پیام ارسال شد")
         except Exception as e:
-            return f"خطا در ارسال پیام \n\n{e}"
+            return error_response(f"خطا در ارسال پیام:\n{e}")
     else:
-        if message.text:
-            text = message.text
-        elif message.caption:
-            text = message.caption
+        text = message.text or message.caption
         try:
             await bale_bot.send_message(bale_channel_id, text)
             await eitaa_bot.send_message(eitaa_channel_id, text)
-            return "پیام ارسال شد "
+            return success_response("پیام ارسال شد")
         except Exception as e:
-            return f"خطا در ارسال پیام \n\n{e}"
+            return error_response(f"خطا در ارسال پیام متنی:\n{e}")
 
 
+# 📤 ارسال باقی‌مانده‌های حدیث
 async def send_leftover_hadith_bale():
-    leftover_hadiths = db_hadith.return_bale_laftover()
-    if not leftover_hadiths:
-        return "پیامی موجود نیست"
+    leftover = db_hadith.return_bale_laftover()
+    if not leftover:
+        return error_response("پیامی موجود نیست")
 
     try:
         with open(hadith_photo_url, "rb") as photo:
-            for hadith_text, hadith_id in leftover_hadiths:
-                text = process_hadith_message(hadith_text, hadith_id)
-                await bale_bot.send_photo(bale_channel_id, photo, text)
-                db_hadith.mark_sent_bale(id=hadith_id)
-        return "پیام‌ها در بله ارسال شدند"
+            for text, id in leftover:
+                msg = process_hadith_message(text, id)
+                await bale_bot.send_photo(bale_channel_id, photo, msg)
+                db_hadith.mark_sent_bale(id=id)
+        return success_response("پیام‌ها در بله ارسال شدند")
     except Exception as e:
-        return f"خطا در ارسال \n\n{e}"
+        return error_response(f"خطا در ارسال بله:\n{e}")
 
 
 async def send_leftover_hadith_eitaa():
-    leftover_hadiths = db_hadith.return_eitaa_laftover()
-    if not leftover_hadiths:
-        return "پیامی موجود نیست"
+    leftover = db_hadith.return_eitaa_laftover()
+    if not leftover:
+        return error_response("پیامی موجود نیست")
 
     try:
         with open(hadith_photo_url, "rb") as photo:
-            for hadith_text, hadith_id in leftover_hadiths:
-                text = process_hadith_message(hadith_text, hadith_id)
-                await eitaa_bot.send_file(bale_channel_id, photo, text)
-                db_hadith.mark_sent_eitaa(id=hadith_id)
-        return "پیام‌ها در ایتا ارسال شدند"
+            for text, id in leftover:
+                msg = process_hadith_message(text, id)
+                await eitaa_bot.send_file(eitaa_channel_id, photo, msg)
+                db_hadith.mark_sent_eitaa(id=id)
+        return success_response("پیام‌ها در ایتا ارسال شدند")
     except Exception as e:
-        return f"خطا در ارسال \n\n{e}"
+        return error_response(f"خطا در ارسال ایتا:\n{e}")
 
 
 async def send_laftover_hadith():
     bale = await send_leftover_hadith_bale()
     eitaa = await send_leftover_hadith_eitaa()
-    return f"ایتا \n {eitaa} \n\n بله \n {bale}"
+    return success_response(
+        "گزارش ارسال", data={"بله": bale["message"], "ایتا": eitaa["message"]}
+    )
+
+
+# 📤 ارسال باقی‌مانده‌های یادداشت
+async def send_leftover_note_bale():
+    leftover = db_notes.return_bale_laftover()
+    if not leftover:
+        return error_response("پیامی موجود نیست")
+
+    try:
+        for text, id in leftover:
+            msg = process_note_message(text, id)
+            await bale_bot.send_message(bale_channel_id, msg)
+            db_notes.mark_sent_bale(id=id)
+        return success_response("یادداشت‌ها در بله ارسال شدند")
+    except Exception as e:
+        return error_response(f"خطا در ارسال یادداشت‌ها به بله:\n{e}")
 
 
 async def send_leftover_note_eitaa():
-    leftover_hadiths = db_notes.return_eitaa_laftover()
-    if not leftover_hadiths:
-        return "پیامی موجود نیست"
+    leftover = db_notes.return_eitaa_laftover()
+    if not leftover:
+        return error_response("پیامی موجود نیست")
 
     try:
-        for hadith_text, hadith_id in leftover_hadiths:
-            text = process_note_message(hadith_text, hadith_id)
-            await eitaa_bot.send_message(bale_channel_id, text)
-            db_notes.mark_sent_eitaa(id=hadith_id)
-        return "پیام‌ها در ایتا ارسال شدند"
+        for text, id in leftover:
+            msg = process_note_message(text, id)
+            await eitaa_bot.send_message(eitaa_channel_id, msg)
+            db_notes.mark_sent_eitaa(id=id)
+        return success_response("یادداشت‌ها در ایتا ارسال شدند")
     except Exception as e:
-        return f"خطا در ارسال \n\n{e}"
-
-
-async def send_leftover_note_bale():
-    leftover_hadiths = db_notes.return_bale_laftover()
-    if not leftover_hadiths:
-        return "پیامی موجود نیست"
-
-    try:
-        for hadith_text, hadith_id in leftover_hadiths:
-            text = process_note_message(hadith_text, hadith_id)
-            await bale_bot.send_message(bale_channel_id, text)
-            db_notes.mark_sent_bale(id=hadith_id)
-        return "پیام‌ها در بله ارسال شدند"
-    except Exception as e:
-        return f"خطا در ارسال \n\n{e}"
+        return error_response(f"خطا در ارسال یادداشت‌ها به ایتا:\n{e}")
 
 
 async def send_laftover_note():
     bale = await send_leftover_note_bale()
     eitaa = await send_leftover_note_eitaa()
-    return f"ایتا \n {eitaa} \n\n بله \n {bale}"
+    return success_response(
+        "گزارش ارسال", data={"بله": bale["message"], "ایتا": eitaa["message"]}
+    )
 
 
+# ⏰ پیام زمان‌بندی‌شده
 async def send_text_schaduler(text):
     try:
-        bale = bale_bot.send_message(bale_channel_id, text)
-        eitaa = eitaa_bot.send_message(eitaa_channel_id, text)
-        await asyncio.gather(bale, eitaa)
+        await asyncio.gather(
+            bale_bot.send_message(bale_channel_id, text),
+            eitaa_bot.send_message(eitaa_channel_id, text),
+        )
+        return success_response("پیام زمان‌بندی‌شده ارسال شد")
     except Exception as e:
-        return str(e)
+        return error_response(f"خطا در ارسال پیام زمان‌بندی‌شده:\n{e}")
 
 
+# 📿 ارسال پیام توحید
 async def send_tohid(time):
-
-    reminders = {
-        "06:00": """صبح‌تون نورانی به ذکر خدا
-    روز رو با تلاوت سوره مبارکه توحید شروع کنیم.
-    بیاید همین حالا با صوتی که گذاشتیم، همگی با هم بخونیم:
-    «قُلْ هُوَ اللّهُ أَحَد» 🌸
-    انرژی روزتون رو از یاد خدا بگیرید 🙏
-
-    #یادآور_بندگی
-    @tamakkon_ir""",
-        "12:00": """در میانه روز، وقتیه که دل‌هامون به یک آرامش دوباره نیاز داره.
-    بیاید چند لحظه‌ای همه با هم سوره مبارکه توحید رو تلاوت کنیم.
-    این ذکر نورانی، بهترین استراحت برای قلب و روح ماست 💫
-
-    #یادآور_بندگی
-    @tamakkon_ir""",
-        "16:00": """غروب که می‌شه، بهترین زمان برای تازه کردن عهد با خداست.
-    بیاید همین حالا همراه صوت سوره مبارکه توحید، همه با هم بخونیم و دل‌هامون رو روشن‌تر کنیم 🌅
-    «اللّهُ الصَّمَد»؛ او بی‌نیاز است و ما همه محتاج او 🙏
-
-    #یادآور_بندگی
-    @tamakkon_ir""",
-        "22:00": """پایان روز، بهترین موقع برای آرامش گرفتن از یاد خداست.
-    بیاید پیش از خواب، سوره مبارکه توحید رو با هم بخونیم.
-    این نور قرائت، بهترین همراه برای شب‌هامون خواهد بود 🌙💤
-
-    #یادآور_بندگی
-    @tamakkon_ir""",
-    }
-
-    text = reminders[time]
+    text = tohid_reminders.get(time)
+    if not text:
+        return error_response("زمان نامعتبر است")
 
     try:
         with open(tohid_audio_url, "rb") as v:
-            await bale_bot.send_audio(bale_channel_id, v, caption=f"{text}")
-            await eitaa_bot.send_file(eitaa_channel_id, v, caption=f"{text}")
-
+            await asyncio.gather(
+                bale_bot.send_audio(bale_channel_id, v, caption=text),
+                eitaa_bot.send_file(eitaa_channel_id, v, caption=text),
+            )
+        return success_response("پیام توحید ارسال شد")
     except Exception as e:
-        return str(e)
+        return error_response(f"خطا در ارسال پیام توحید:\n{e}")
 
 
+# 🌹 ارسال صلوات خاص
 async def send_salavat_8():
     text = """✨ بیاید با صلوات خاص امام رضا (ع) دل‌هامون رو روشن کنیم 🌟
 اللهم صلّ علی علی بن موسی الرضا 🌹
@@ -220,54 +209,58 @@ async def send_salavat_8():
 
     try:
         with open(salavat_audio_url, "rb") as v:
-            await eitaa_bot.send_file(eitaa_channel_id, v, caption=f"{text}")
-            await bale_bot.send_audio(bale_channel_id, v, caption=f"{text}")
-
+            await asyncio.gather(
+                eitaa_bot.send_file(eitaa_channel_id, v, caption=text),
+                bale_bot.send_audio(bale_channel_id, v, caption=text),
+            )
+        return success_response("صلوات ارسال شد")
     except Exception as e:
-        return str(e)
+        return error_response(f"خطا در ارسال صلوات:\n{e}")
 
 
+# 📆 ارسال ذکر روز
 async def send_day_info():
-    day = get_mentioning_the_day()
+    day = get_mentioning_day()
     text = f"""یک صبح دیگر شروع شد بیاید با خواندن ذکر امروز و اهدای ثواب آن برای تعجیل حضرت حجت (عج)
 در ظهور آن حضرت سهیم باشم
 امروز {day['name']} تاریخ {day['date']} 
 ذکر روز {day['zekr']}"""
 
     try:
-        bale = await bale_bot.send_photo(bale_channel_id, day["path"], text)
-        eitaa = await eitaa_bot.send_file(eitaa_channel_id, day["path"], text)
-
-        if not (bale and eitaa):
-            raise Exception("پیام در بله یا ایتا ارسال نشد!")
-
+        await asyncio.gather(
+            bale_bot.send_photo(bale_channel_id, day["path"], text),
+            eitaa_bot.send_file(eitaa_channel_id, day["path"], text),
+        )
+        return success_response("ذکر روز ارسال شد")
     except Exception as e:
-        return e
+        return error_response(f"خطا در ارسال ذکر روز:\n{e}")
 
 
+# 📤 ارسال کلیپ خودکار
 async def send_auto_clip():
-    id, file_id, text = clips.auto_return_file_id()
-    bin_fil = await file_id_to_bynery(file_id, bale_bot)
-
     try:
-        bale = await bale_bot.send_video(
-            bale_channel_id, bin_fil.read(), caption=(text or "")
-        )
-        eitaa = await eitaa_bot.send_file(
-            eitaa_channel_id, bin_fil, caption=(text or "")
+        id, file_id, text = db_clips.auto_return_file_id()
+        bin_fil = await file_id_to_bynery(file_id, bale_bot)
+
+        await asyncio.gather(
+            bale_bot.send_video(bale_channel_id, bin_fil.read(), caption=(text or "")),
+            eitaa_bot.send_file(eitaa_channel_id, bin_fil, caption=(text or "")),
         )
 
-        if not (bale and eitaa):
-            raise Exception("پیام در بله یا ایتا ارسال نشد!")
-
-        clips.mark_clip_sent(id)
+        db_clips.mark_clip_sent(id)
+        return success_response("کلیپ ارسال شد")
     except Exception as e:
-        return e
+        return error_response(f"خطا در ارسال کلیپ:\n{e}")
 
 
+# 📚 ارسال کتاب خودکار
 async def send_auto_book():
-    book = books.get_unsent_book()
-    text = f"""
+    try:
+        book = db_books.get_unsent_book()
+        if not book:
+            return error_response("کتاب جدیدی برای ارسال وجود ندارد")
+
+        text = f"""
 📖 کتاب امروز
 
 «{book['title']}» نوشته‌ی {book['author']}، منتشر شده توسط {book['publisher'] or 'ناشر نامشخص'}.
@@ -279,13 +272,13 @@ async def send_auto_book():
 
 #کتاب #مطالعه #{book['id']}
 """
-    try:
-        bale = await bale_bot.send_message(bale_channel_id, text)
-        eitaa = await eitaa_bot.send_message(eitaa_channel_id, text)
 
-        if not (bale and eitaa):
-            raise Exception("پیام در بله یا ایتا ارسال نشد!")
+        await asyncio.gather(
+            bale_bot.send_message(bale_channel_id, text),
+            eitaa_bot.send_message(eitaa_channel_id, text),
+        )
 
-        books.mark_book_sent(book["id"])
+        db_books.mark_book_sent(book["id"])
+        return success_response("کتاب ارسال شد")
     except Exception as e:
-        return e
+        return error_response(f"خطا در ارسال کتاب:\n{e}")

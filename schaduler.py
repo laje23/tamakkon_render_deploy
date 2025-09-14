@@ -7,7 +7,7 @@ from send_message_handler import (
     send_tohid,
     auto_send_not,
     send_salavat_8,
-    get_mentioning_the_day,
+    get_mentioning_day,
 )
 from pytz import timezone
 
@@ -19,7 +19,7 @@ async def scheduled_messages():
         current_time = now.strftime("%H:%M")
 
         if current_time == "06:00":
-            err = await send_text_schaduler(get_mentioning_the_day())
+            err = await send_text_schaduler(get_mentioning_day())
             await send_to_debugger(f"[06:00] خطا در ارسال ذکر روز: {err}")
 
             tx = await auto_send_hadith()

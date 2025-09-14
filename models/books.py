@@ -1,4 +1,4 @@
-from models.database_connection import get_connection
+from .database_connection import get_connection
 
 
 class BooksTableManager:

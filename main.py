@@ -7,7 +7,6 @@ from send_message_handler import send_message_to_channel, send_to_debugger
 from models import clips
 from schaduler import scheduled_messages
 import threading
-import asyncio
 
 load_dotenv()
 
