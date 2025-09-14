@@ -1,10 +1,20 @@
-from config import (
-    bale_bot,
-    back_menu,
-    db_notes,
-    user_temp_data,
-    edit_note_menu,
-)
+from config import *
+
+
+def fa_to_en_int(num):
+    fa_digits = '۰۱۲۳۴۵۶۷۸۹'
+    en_digits = '0123456789'
+    result = ''
+    for ch in str(num):
+        if ch in fa_digits:
+            result += en_digits[fa_digits.index(ch)]
+        elif ch in en_digits:
+            result += ch
+        else:
+            continue  # یا raise ValueError برای کاراکترهای نامعتبر
+    return int(result)
+
+
 
 # پیام‌های ثابت
 MSG_INVALID_NUMBER = "❗️ لطفاً فقط عدد مثبت وارد کنید."
@@ -18,8 +28,9 @@ MSG_NOTE_EDITED = "یادداشت ویرایش شد."
 
 
 async def first_step_save(message):
-    note_number = message.text
-    if not note_number.isdigit() or int(note_number) <= 0:
+    note_number = fa_to_en_int(message.text)
+    
+    if note_number <= 0:
         await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
         return
 
@@ -55,8 +66,9 @@ async def next_step_save(message):
 
 
 async def first_state_edit(message):
-    note_number = message.text
-    if not note_number.isdigit() or int(note_number) <= 0:
+    note_number = fa_to_en_int(message.text)
+    
+    if note_number <= 0:
         await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
         return
 
