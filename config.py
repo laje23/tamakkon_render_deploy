@@ -5,6 +5,7 @@ from models import hadith as db_hadith
 from models import notes as db_notes
 from models import clips as db_clips
 from models import books as db_books
+from models import lecture as db_lecture
 import asyncio
 import threading
 import os
@@ -13,7 +14,7 @@ import os
 user_temp_data = {}
 # assignment initial variables...................................
 
-bale_bot = Client(os.getenv("BALE_BOT_TOKEN"))
+bale_bot = Client(os.getenv("BALE_BOT_TOKEN"), time_out=60.0)
 eitaa_bot = EitaaBot(os.getenv("EITAA_BOT_TOKEN"))
 
 debugger_id = os.getenv("DEBUGER_ID")
@@ -21,16 +22,29 @@ debugger_id = os.getenv("DEBUGER_ID")
 group_reserch_hadith_id = int(os.getenv("RESERCH_HADITH"))
 group_reserch_clip_id = int(os.getenv("RESERCH_CLIP_ID"))
 
+
 bale_channel_id = int(os.getenv("CHANNEL_BALE"))
 eitaa_channel_id = int(os.getenv("CHANNEL_EITAA"))
 
 
-hadith_photo_url = os.getenv("HADITH_POTO_URL")
-tohid_audio_url = os.getenv("TOHID_AUDIO_URL")
-salavat_audio_url = os.getenv("SALAVAT_AUDIO_URL")
-base_day_name_url = os.getenv("BASE_DAY_URL")
+base_image_url = os.getenv("BASE_IMAGE_URL")
+base_mentioning_image_url = os.getenv("BASE_DAY_URL")
+base_audio_url = os.getenv("BASE_AUDIO_URL")
 
-admins = [893366360, 1462760140]
+
+hadith_photo_url = base_image_url + "hadith.jpg"
+
+tohid_audio_url = base_audio_url + "Tohid.mp3"
+prayer_salavaat_url = base_audio_url + "Salavaat.mp3"
+Prayer_faraj_url = base_audio_url + "Faraj.mp3"
+Prayer_ahd_url = base_audio_url + "Ahd.mp3"
+
+
+admins = admins = [
+    int(admin_id)
+    for admin_id in os.getenv("ADMINS_ID", "").split(",")
+    if admin_id.strip()
+]
 
 
 # create tables ..............................................
@@ -38,6 +52,7 @@ db_hadith.create_table()
 db_notes.create_table()
 db_clips.create_table()
 db_books.create_table()
+db_lecture.create_table()
 
 
 # process messages  ........................................................
@@ -105,7 +120,6 @@ def message_menu():
         [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("کتاب ها", "book_menu")],
         [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
-        [InlineKeyboardButton("ارسال پیام های جا مانده ", "send_laftovers")],
         [InlineKeyboardButton("گرفتن آمار", "get_status")],
         [InlineKeyboardButton("بازگشت", "back_to_main")],
     )
@@ -185,4 +199,39 @@ tohid_reminders = {
 
 #یادآور_بندگی
 @tamakkon_ir""",
+}
+
+
+prayers = {
+    "faraj": {
+        "url": Prayer_faraj_url,
+        "caption": """🌸 دعای فرج
+
+با دعای فرج، دل‌ها آرام و جان‌ها سرشار از امید می‌شود.
+فراموش نکنیم امروز نیز با این دعا، ظهور مولایمان حضرت ولی‌عصر (عج) را طلب کنیم. 🌹
+
+#یادآور_فرج
+@tamakkon_ir""",
+        "local": True,
+    },
+    "ahd": {
+        "url": Prayer_ahd_url,
+        "caption": """🌅 دعای عهد
+
+با دعای عهد، پیمان قلبی‌مان با امام زمان (عج) را تازه می‌کنیم.
+هر صبح با این دعا، امید و عهدی نو در دل‌ها زنده می‌شود. 💫
+
+#دعای_عهد
+@tamakkon_ir""",
+        "local": True,
+    },
+    "salavat": {
+        "url": prayer_salavaat_url,
+        "caption": """✨ بیاید با صلوات خاص امام رضا (ع) دل‌هامون رو روشن کنیم 🌟
+اللهم صلّ علی علی بن موسی الرضا 🌹
+
+#یادآور_خادمی
+@tamakkon_ir""",
+        "local": True,
+    },
 }

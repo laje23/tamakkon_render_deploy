@@ -1,6 +1,8 @@
+import traceback
 from datetime import datetime
 import jdatetime
 import io
+from config import base_mentioning_image_url
 
 
 async def get_media_bytes(message, bot) -> bytes | None:
@@ -37,43 +39,43 @@ def get_mentioning_day():
         "Saturday": {
             "fa": "شنبه",
             "zekr": "یا رب العالمین",
-            "image_path": "media/mentioning_the_day/day (1).jpg",
+            "image_path": f"{base_mentioning_image_url} (1).jpg",
             "text": "امروز شنبه است، روزی برای شروع تازه.",
         },
         "Sunday": {
             "fa": "یک‌شنبه",
             "zekr": "یا ذاالجلال و الاکرام",
-            "image_path": "media/mentioning_the_day/day (2).jpg",
+            "image_path": f"{base_mentioning_image_url} (2).jpg",
             "text": "یک‌شنبه، روزی پر از انرژی و امید.",
         },
         "Monday": {
             "fa": "دوشنبه",
             "zekr": "یا قاضی الحاجات",
-            "image_path": "media/mentioning_the_day/day (3).jpg",
+            "image_path": f"{base_mentioning_image_url} (3).jpg",
             "text": "دوشنبه، فرصتی دوباره برای تلاش.",
         },
         "Tuesday": {
             "fa": "سه‌شنبه",
             "zekr": "یا ارحم الراحمین",
-            "image_path": "media/mentioning_the_day/day (4).jpg",
+            "image_path": f"{base_mentioning_image_url} (4).jpg",
             "text": "سه‌شنبه، روز بخشش و مهربانی.",
         },
         "Wednesday": {
             "fa": "چهارشنبه",
             "zekr": "یا حی یا قیوم",
-            "image_path": "media/mentioning_the_day/day (5).jpg",
+            "image_path": f"{base_mentioning_image_url} (5).jpg",
             "text": "چهارشنبه، روزی برای تامل و اندیشه.",
         },
         "Thursday": {
             "fa": "پنج‌شنبه",
             "zekr": "لا اله الا الله الملک الحق المبین",
-            "image_path": "media/mentioning_the_day/day (6).jpg",
+            "image_path": f"{base_mentioning_image_url} (6).jpg",
             "text": "پنج‌شنبه، روز تلاش و موفقیت.",
         },
         "Friday": {
             "fa": "جمعه",
             "zekr": "اللهم صل علی محمد و آل محمد",
-            "image_path": "media/mentioning_the_day/day (7).jpg",
+            "image_path": f"{base_mentioning_image_url} (7).jpg",
             "text": "جمعه، روز آرامش و استراحت.",
         },
     }
@@ -110,9 +112,10 @@ def success_response(message="", data=None):
     }
 
 
-def error_response(message="", data=None):
+def error_response(message: str, exception: Exception = None):
     return {
         "success": False,
         "message": message,
-        "data": data,
+        "error_type": type(exception).__name__ if exception else None,
+        "traceback": traceback.format_exc() if exception else None,
     }

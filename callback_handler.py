@@ -14,6 +14,13 @@ async def call_handler(callback_query):
             ci, mi, "سلام! یکی از گزینه‌ها رو انتخاب کن:", main_menu(ui in admins)
         )
 
+    elif t == "in_update":
+        x = await _send.send_prayer("faraj")
+        y = await _send.send_prayer("salavat")
+        z = await _send.send_prayer("ahd")
+        for i in [x, y, z]:
+            await _send.send_to_debugger(i, True)
+
     # 📩 بازگشت به منوی پیام‌ها
     elif t == "back_to_message":
         try:
@@ -84,9 +91,6 @@ async def call_handler(callback_query):
         result = await _send.send_auto_book()
         await bale_bot.send_message(ci, result["message"], back_menu())
 
-    elif t == "in_update":
-        pass
-
     # 🧾 ذخیره یادداشت
     elif t == "save_note":
         callback_query.author.set_state("INPUT_NUMBER_NOTE")
@@ -111,18 +115,3 @@ async def call_handler(callback_query):
     elif t == "send_to_channel":
         await bale_bot.send_message(ci, "پیام را ارسال یا فوروارد کنید")
         callback_query.author.set_state("SEND_MESSAGE_TO_CHANEL")
-
-    # 🧹 ارسال باقی‌مانده‌ها
-    elif t == "send_laftovers":
-        hadith = await _send.send_laftover_hadith()
-        note = await _send.send_laftover_note()
-
-        text = f"""📤 گزارش ارسال باقی‌مانده‌ها:
-
-📜 احادیث:
-{hadith["message"]}
-
-📝 یادداشت‌ها:
-{note["message"]}
-"""
-        await bale_bot.send_message(ci, text, back_menu())

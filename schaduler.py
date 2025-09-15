@@ -1,66 +1,71 @@
 import asyncio
 from datetime import datetime
-from send_message_handler import (
-    send_text_schaduler,
-    send_to_debugger,
-    auto_send_hadith,
-    send_tohid,
-    auto_send_not,
-    send_salavat_8,
-    get_mentioning_day,
-)
 from pytz import timezone
+
+from send_message_handler import (
+    send_prayer,
+    send_day_info,
+    auto_send_hadith,
+    send_auto_clip,
+    send_tohid,
+    send_auto_book,
+    auto_send_not,
+    send_auto_lecture,  # فرض می‌گیریم اینو خودت می‌سازی یا ساخته‌ای
+    send_to_debugger,
+)
 
 
 async def scheduled_messages():
+    sent_today = set()  # برای اینکه یک پیام دوباره در همون دقیقه ارسال نشه
+
     while True:
         iran = timezone("Asia/Tehran")
         now = datetime.now(iran)
         current_time = now.strftime("%H:%M")
 
-        if current_time == "06:00":
-            err = await send_text_schaduler(get_mentioning_day())
-            await send_to_debugger(f"[06:00] خطا در ارسال ذکر روز: {err}")
+        if current_time not in sent_today:
+            try:
+                if current_time == "06:00":
+                    await send_prayer("ahd")
 
-            tx = await auto_send_hadith()
-            await send_to_debugger(f"[06:00] خطا در ارسال حدیث تصادفی: {tx}")
+                elif current_time == "07:47":
+                    await send_day_info()
 
-            err = await send_tohid("06:00")
-            await send_to_debugger(f"[06:00] خطا در ارسال یادآور سوره توحید: {err}")
+                elif current_time == "09:34":
+                    await auto_send_hadith()
 
-        elif current_time == "08:00":
-            tx = await auto_send_not()
-            await send_to_debugger(f"[08:00] خطا در ارسال یادداشت استاد: {tx}")
+                elif current_time == "11:21":
+                    await send_auto_clip()
 
-            err = await send_salavat_8()
-            await send_to_debugger(f"[08:00] خطا در ارسال صلوات خاصه امام رضا: {err}")
+                elif current_time == "13:08":
+                    await send_tohid("13:08")
 
-        elif current_time == "12:00":
-            tx = await auto_send_hadith()
-            await send_to_debugger(f"[12:00] خطا در ارسال حدیث تصادفی: {tx}")
+                elif current_time == "14:55":
+                    await auto_send_hadith()
 
-            err = await send_tohid("12:00")
-            await send_to_debugger(f"[12:00] خطا در ارسال یادآور سوره توحید: {err}")
+                elif current_time == "16:42":
+                    await send_auto_book()
 
-        elif current_time == "16:00":
-            tx = await auto_send_not()
-            await send_to_debugger(f"[16:00] خطا در ارسال یادداشت استاد: {tx}")
+                elif current_time == "18:29":
+                    await send_prayer("faraj")
 
-            err = await send_tohid("16:00")
-            await send_to_debugger(f"[16:00] خطا در ارسال یادآور سوره توحید: {err}")
+                elif current_time == "20:16":
+                    await auto_send_not()
 
-        elif current_time == "20:00":
-            err = await send_salavat_8()
-            await send_to_debugger(f"[20:00] خطا در ارسال صلوات خاصه امام رضا: {err}")
+                elif current_time == "22:03":
+                    await send_auto_lecture()
 
-            tx = await auto_send_hadith()
-            await send_to_debugger(f"[20:00] خطا در ارسال حدیث تصادفی: {tx}")
+                else:
+                    pass  # زمان فعلی در لیست برنامه نیست
 
-        elif current_time == "22:00":
-            tx = await auto_send_not()
-            await send_to_debugger(f"[22:00] خطا در ارسال یادداشت استاد: {tx}")
+                sent_today.add(current_time)
+            except Exception as e:
+                await send_to_debugger(
+                    f"[{current_time}] خطا در اجرای برنامه زمان‌بندی:\n{e}"
+                )
 
-            err = await send_tohid("22:00")
-            await send_to_debugger(f"[22:00] خطا در ارسال یادآور سوره توحید: {err}")
+        # ریست کردن لیست زمان‌های اجرا شده در روز بعد
+        if current_time == "00:00":
+            sent_today.clear()
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(30)
