@@ -21,6 +21,7 @@ debugger_id = os.getenv("DEBUGER_ID")
 
 group_reserch_hadith_id = int(os.getenv("RESERCH_HADITH"))
 group_reserch_clip_id = int(os.getenv("RESERCH_CLIP_ID"))
+group_reserch_lecture_id = int(os.getenv("RESERCH_LECTURE_ID"))
 
 
 bale_channel_id = int(os.getenv("CHANNEL_BALE"))
@@ -34,26 +35,18 @@ base_audio_url = os.getenv("BASE_AUDIO_URL")
 
 hadith_photo_url = base_image_url + "hadith.jpg"
 
+
 tohid_audio_url = base_audio_url + "Tohid.mp3"
 prayer_salavaat_url = base_audio_url + "Salavaat.mp3"
 Prayer_faraj_url = base_audio_url + "Faraj.mp3"
 Prayer_ahd_url = base_audio_url + "Ahd.mp3"
 
 
-admins = admins = [
+admins = [
     int(admin_id)
     for admin_id in os.getenv("ADMINS_ID", "").split(",")
     if admin_id.strip()
 ]
-
-
-# create tables ..............................................
-db_hadith.create_table()
-db_notes.create_table()
-db_clips.create_table()
-db_books.create_table()
-db_lecture.create_table()
-
 
 # process messages  ........................................................
 # 🧠 پردازش پیام‌ها

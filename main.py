@@ -3,8 +3,8 @@ from config import *
 from state_handler import *
 from callback_handler import call_handler
 from dotenv import load_dotenv
+from utils import error_response
 from send_message_handler import send_message_to_channel, send_to_debugger
-from models import clips
 from schaduler import scheduled_messages
 import threading
 
@@ -112,7 +112,16 @@ async def collect_group_input(message):
             db_hadith.save_id_and_content(message.id, message.text)
 
         elif message.chat.id == group_reserch_clip_id and message.video:
-            clips.save_clip(message.video.id, message.caption)
+            if message.video :
+                db_clips.save_clip(message.video.id, message.caption)
+            else :
+                await send_to_debugger(error_response('پیام ارسال شده در گروه کلیپ فرمتی نامعتبر دارد'))
+            
+        elif message.chat.id == group_reserch_lecture_id :
+            if message.audio :
+                db_lecture.save_lecture(message.audio.id , message.caption)            
+            else :
+                await send_to_debugger(error_response('پیام ارسال شده در گروه سخنرانی فرمتی نامعتبر دارد'))
 
     except Exception as e:
         await send_to_debugger(e)
