@@ -1,8 +1,27 @@
+version: "3.9"
+
 services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: tamakkon_user
+      POSTGRES_PASSWORD: tamakkon313
+      POSTGRES_DB: tamakkon_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   tamakkon_bot:
     build:
       context: .
     image: tamakkon_bot:latest
     env_file:
       - .env
+    depends_on:
+      - db
     restart: always
+
+volumes:
+  pgdata:
