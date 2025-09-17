@@ -8,7 +8,7 @@ def get_connection():
     try:
         return psycopg2.connect(
             dbname=os.getenv("PGDATABASE"),
-            user=os.getenv("PGUSER"),
+            user=os.getenv("POSTGRES"),
             password=os.getenv("PGPASSWORD"),
             host=os.getenv("PGHOST"),
             port=os.getenv("PGPORT"),
