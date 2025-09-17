@@ -5,9 +5,9 @@ services:
     image: postgres:15
     restart: always
     environment:
-      - POSTGRES_USER: ${POSTGRES}
-      - POSTGRES_PASSWORD: ${PGPASSWORD}
-      - POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${POSTGRES}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
     ports:
       - "${PGPORT}:5432"
     volumes:
