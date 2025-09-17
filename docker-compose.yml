@@ -4,12 +4,14 @@ services:
   db:
     image: postgres:15
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: tamakkon_user
-      POSTGRES_PASSWORD: tamakkon313
-      POSTGRES_DB: tamakkon_db
+      POSTGRES_USER: ${POSTGRES}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
     ports:
-      - "5432:5432"
+      - "${PGPORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -17,8 +19,6 @@ services:
     build:
       context: .
     image: tamakkon_bot:latest
-    env_file:
-      - .env
     depends_on:
       - db
     restart: always
