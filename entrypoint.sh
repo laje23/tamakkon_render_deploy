@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "⏳ منتظر شدن برای آماده شدن دیتابیس..."
-until pg_isready -h "$PGHOST" -p "$PGPORT" >/dev/null 2>&1; do
+until pg_isready -h "$PGHOST" -p "5432" >/dev/null 2>&1; do
   echo "Waiting for PostgreSQL..."
   sleep 2
 done
