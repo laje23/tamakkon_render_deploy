@@ -131,8 +131,9 @@ async def call_handler(callback_query):
             set_schaduler_state(False)
             await bale_bot.edit_message_text(ci, mi, "زمانبندی غیرفعال شد", back_menu())
 
-
     elif t == "auto_send_lecture":
         result = await _send.send_auto_lecture()
         await bale_bot.send_message(ci, result["message"], back_menu())
 
+    elif t == "add_and_edit":
+        await bale_bot.edit_message_text(ci, mi, "وضعیت زمانبندی", save_or_edit_menu())

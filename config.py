@@ -113,8 +113,7 @@ def main_menu(is_admin: bool):
 def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("ارسال ها", "send_menu")],
-        [InlineKeyboardButton("یادداشت", "note_menu")],
-        [InlineKeyboardButton("کتاب ها", "book_menu")],
+        [InlineKeyboardButton("ذخیره و ویرایش", "add_and_edit")],
         [InlineKeyboardButton("گرفتن آمار", "get_status")],
         [InlineKeyboardButton("زمانبندی", "schaduler_menu")],
         [InlineKeyboardButton("بازگشت", "back_to_main")],
@@ -165,7 +164,6 @@ def send_menu():
         [InlineKeyboardButton("سخنرانی", "auto_send_lecture")],
         [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
-        
     )
 
 

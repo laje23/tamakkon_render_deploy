@@ -65,4 +65,4 @@ async def scheduled_messages():
             if current_time == "00:00":
                 sent_today.clear()
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
