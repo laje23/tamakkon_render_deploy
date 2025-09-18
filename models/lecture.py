@@ -85,6 +85,6 @@ def auto_return_lecture():
         return db.select_auto_file_id()
 
 
-def get_lecture_status():
+def get_status():
     with LecturesTable() as db:
         return db.get_sent_unsent_counts()

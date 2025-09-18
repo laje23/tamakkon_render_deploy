@@ -115,7 +115,7 @@ def mark_book_sent(book_id):
         db.mark_book_sent(book_id)
 
 
-def get_book_status():
+def get_status():
     with BooksTableManager() as db:
         return db.get_sent_unsent_counts()
 
