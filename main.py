@@ -1,12 +1,12 @@
 from balethon.conditions import command, group, at_state, private, all
 from config import *
 from state_handler import *
-from callback_handler import call_handler
 from dotenv import load_dotenv
 from utils import error_response
 from send_message_handler import send_message_to_channel, send_to_debugger
 from schaduler import scheduled_messages
 import threading
+import callback_handler as call
 
 load_dotenv()
 
@@ -14,7 +14,7 @@ load_dotenv()
 # 🎯 هندل کردن دکمه‌های callback
 @bale_bot.on_callback_query(private)
 async def reply_buttons(callback_query):
-    await call_handler(callback_query)
+    await call.call_handler(callback_query)
 
 
 # 🚀 شروع ربات
@@ -112,22 +112,25 @@ async def collect_group_input(message):
             db_hadith.save_id_and_content(message.id, message.text)
 
         elif message.chat.id == group_reserch_clip_id and message.video:
-            if message.video :
+            if message.video:
                 db_clips.save_clip(message.video.id, message.caption)
-            else :
-                await send_to_debugger(error_response('پیام ارسال شده در گروه کلیپ فرمتی نامعتبر دارد'))
-            
-        elif message.chat.id == group_reserch_lecture_id :
-            if message.audio :
-                db_lecture.save_lecture(message.audio.id , message.caption)            
-            else :
-                await send_to_debugger(error_response('پیام ارسال شده در گروه سخنرانی فرمتی نامعتبر دارد'))
+            else:
+                await send_to_debugger(
+                    error_response("پیام ارسال شده در گروه کلیپ فرمتی نامعتبر دارد")
+                )
+
+        elif message.chat.id == group_reserch_lecture_id:
+            if message.document:
+                db_lecture.save_lecture(message.document.id, message.caption)
+            else:
+                await send_to_debugger(
+                    error_response("پیام ارسال شده در گروه سخنرانی فرمتی نامعتبر دارد")
+                )
 
     except Exception as e:
         await send_to_debugger(e)
 
 
-# ⏰ اجرای پیام‌های زمان‌بندی‌شده
 def start_scheduler_loop():
     asyncio.run(scheduled_messages())
 

@@ -12,7 +12,9 @@ import os
 
 
 user_temp_data = {}
+schaduler_state = False
 # assignment initial variables...................................
+
 
 bale_bot = Client(os.getenv("BALE_BOT_TOKEN"), time_out=60.0)
 eitaa_bot = EitaaBot(os.getenv("EITAA_BOT_TOKEN"))
@@ -47,6 +49,7 @@ admins = [
     for admin_id in os.getenv("ADMINS_ID", "").split(",")
     if admin_id.strip()
 ]
+
 
 # process messages  ........................................................
 # 🧠 پردازش پیام‌ها
@@ -112,8 +115,8 @@ def message_menu():
         [InlineKeyboardButton("ارسال ها", "send_menu")],
         [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("کتاب ها", "book_menu")],
-        [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("گرفتن آمار", "get_status")],
+        [InlineKeyboardButton("زمانبندی", "schaduler_menu")],
         [InlineKeyboardButton("بازگشت", "back_to_main")],
     )
 
@@ -124,6 +127,17 @@ def note_menu():
         [InlineKeyboardButton("ویرایش", "edit_note")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
     )
+
+
+def schaduler_menu(on):
+    rows = []
+    if on:
+        rows.append([InlineKeyboardButton("خاموش کردن زمانبندی", "schaduler_off")])
+    else:
+        rows.append([InlineKeyboardButton("روشن کردن زمانبندی", "schaduler_on")])
+
+    rows.append([InlineKeyboardButton("بازگشت", "back_to_message")])
+    return InlineKeyboard(*rows)
 
 
 def book_menu():
@@ -148,7 +162,10 @@ def send_menu():
         [InlineKeyboardButton("یادداشت", "auto_send_note")],
         [InlineKeyboardButton("کتاب", "auto_send_book")],
         [InlineKeyboardButton("کلیپ", "auto_send_clip")],
+        [InlineKeyboardButton("سخنرانی", "auto_send_lecture")],
+        [InlineKeyboardButton("ارسال پیام به کانال ", "send_to_channel")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
+        
     )
 
 

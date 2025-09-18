@@ -1,4 +1,5 @@
 from config import *
+from utils import set_schaduler_state, get_schaduler_state
 import send_message_handler as _send
 
 
@@ -115,3 +116,23 @@ async def call_handler(callback_query):
     elif t == "send_to_channel":
         await bale_bot.send_message(ci, "پیام را ارسال یا فوروارد کنید")
         callback_query.author.set_state("SEND_MESSAGE_TO_CHANEL")
+
+    elif t == "schaduler_menu":
+        await bale_bot.edit_message_text(
+            ci, mi, "وضعیت زمانبندی", schaduler_menu(on=get_schaduler_state())
+        )
+
+    elif t.startswith("schaduler"):
+        if t == "schaduler_on":
+            set_schaduler_state(True)
+            await bale_bot.edit_message_text(ci, mi, "زمانبندی فعال شد", back_menu())
+
+        elif t == "schaduler_off":
+            set_schaduler_state(False)
+            await bale_bot.edit_message_text(ci, mi, "زمانبندی غیرفعال شد", back_menu())
+
+
+    elif t == "auto_send_lecture":
+        result = await _send.send_auto_lecture()
+        await bale_bot.send_message(ci, result["message"], back_menu())
+
