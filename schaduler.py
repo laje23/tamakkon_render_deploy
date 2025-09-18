@@ -7,7 +7,6 @@ from send_message_handler import (
     send_day_info,
     auto_send_hadith,
     send_auto_clip,
-    send_tohid,
     send_auto_book,
     auto_send_not,
     send_auto_lecture,  # فرض می‌گیریم اینو خودت می‌سازی یا ساخته‌ای
@@ -38,7 +37,7 @@ async def scheduled_messages():
                         await send_auto_clip()
 
                     elif current_time == "13:08":
-                        await send_tohid("13:08")
+                        await send_prayer("tohid")
 
                     elif current_time == "14:55":
                         await auto_send_hadith()

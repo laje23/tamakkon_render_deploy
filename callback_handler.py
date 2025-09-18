@@ -71,6 +71,7 @@ async def call_handler(callback_query):
 یادداشت‌ها
     ارسال شده: {note['sent']}
     ارسال نشده: {note['unsent']}
+
 سخنرانی ها 
     ارسال شده: {lecture['sent']}
     ارسال نشده: {lecture['unsent']}

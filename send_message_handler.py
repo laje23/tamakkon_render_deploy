@@ -99,22 +99,6 @@ async def send_text_schaduler(text):
         return error_response("خطا در ارسال پیام زمان‌بندی‌شده", e)
 
 
-async def send_tohid(time):
-    text = tohid_reminders.get(time)
-    if not text:
-        return error_response("زمان نامعتبر است")
-
-    try:
-        with open(tohid_audio_url, "rb") as v:
-            await asyncio.gather(
-                bale_bot.send_audio(bale_channel_id, v, caption=text),
-                eitaa_bot.send_file(eitaa_channel_id, v, caption=text),
-            )
-        return success_response("پیام توحید ارسال شد")
-    except Exception as e:
-        return error_response("خطا در ارسال پیام توحید", e)
-
-
 async def send_day_info():
     day = get_mentioning_day()
     text = f"""یک صبح دیگر شروع شد بیاید با خواندن ذکر امروز و اهدای ثواب آن برای تعجیل حضرت حجت (عج)
@@ -184,12 +168,12 @@ async def send_auto_book():
 import asyncio
 
 
-async def send_prayer(prayer_type: Literal["faraj", "ahd", "salavat"]):
+async def send_prayer(prayer_type: Literal["faraj", "ahd", "salavat", "tohid"]):
     try:
         prayer = prayers.get(prayer_type)
         if not prayer:
             result = error_response(
-                "نوع دعای وارد شده معتبر نیست. از 'faraj'، 'ahd' یا 'salavat' استفاده کنید."
+                "نوع دعای وارد شده معتبر نیست. از 'faraj'، 'ahd' یا 'salavat'  یا 'tohid 'استفاده کنید."
             )
             await send_to_debugger(result)
             return result
