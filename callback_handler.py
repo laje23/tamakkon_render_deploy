@@ -52,6 +52,7 @@ async def call_handler(callback_query):
         clip = db_clips.get_status()
         hadith = db_hadith.get_status()
         note = db_notes.get_status()
+        lecture = db_lecture.get_status()
 
         text = f"""آمار کلی سیستم:
 .............................
@@ -70,6 +71,9 @@ async def call_handler(callback_query):
 یادداشت‌ها
     ارسال شده: {note['sent']}
     ارسال نشده: {note['unsent']}
+سخنرانی ها 
+    ارسال شده: {lecture['sent']}
+    ارسال نشده: {lecture['unsent']}
 """
         await bale_bot.edit_message_text(ci, mi, text, back_menu())
 
