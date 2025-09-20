@@ -58,9 +58,17 @@ async def auto_send_not():
         if file_id:
             file = await file_id_to_bynery(file_id, bale_bot)
             if media_type == "photo":
-                await bale_bot.send_photo(bale_channel_id, file.read(), process_note_message(messages[0],id))
-                await eitaa_bot.send_file(eitaa_channel_id, file, process_note_message(messages[0],id))
-                messages.pop(0)
+                await bale_bot.send_photo(
+                    bale_channel_id, file.read(), process_note_message(messages[0], id)
+                )
+            if media_type == "video":
+                await bale_bot.send_video(
+                    bale_channel_id, file.read(), process_note_message(messages[0], id)
+                )
+            await eitaa_bot.send_file(
+                eitaa_channel_id, file, process_note_message(messages[0], id)
+            )
+            messages.pop(0)
 
         for text in messages:
             await bale_bot.send_message(bale_channel_id, process_note_message(text, id))

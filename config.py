@@ -61,13 +61,7 @@ def process_hadith_message(text: str, id: int | str, eitaa=False) -> str:
     @tamakkon_ir"""
 
     else:
-        return f"""{text}\n\nمعرفی کتاب:
-    https://ble.ir/tamakkon_ir/-400893920905783805/1757415117292
-
-
-    دانلود کتاب:
-    https://ble.ir/tamakkon_ir/7588061826126981347/1757415238870
-
+        return f"""{text}\n\n
     #حدیث
     #{id}
     @tamakkon_ir"""
