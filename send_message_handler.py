@@ -63,8 +63,10 @@ async def auto_send_not():
                 messages.pop(0)
 
         for text in messages:
-            await bale_bot.send_message(bale_channel_id, process_note_message(text))
-            await eitaa_bot.send_message(eitaa_channel_id, process_note_message(text))
+            await bale_bot.send_message(bale_channel_id, process_note_message(text, id))
+            await eitaa_bot.send_message(
+                eitaa_channel_id, process_note_message(text, id)
+            )
 
         db_notes.mark_sent(id)
         return success_response("یادداشت ارسال شد")
