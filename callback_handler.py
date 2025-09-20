@@ -16,11 +16,7 @@ async def call_handler(callback_query):
         )
 
     elif t == "in_update":
-        x = await _send.send_prayer("faraj")
-        y = await _send.send_prayer("salavat")
-        z = await _send.send_prayer("ahd")
-        for i in [x, y, z]:
-            await _send.send_to_debugger(i, True)
+        pass
 
     # 📩 بازگشت به منوی پیام‌ها
     elif t == "back_to_message":
@@ -142,3 +138,8 @@ async def call_handler(callback_query):
 
     elif t == "add_and_edit":
         await bale_bot.edit_message_text(ci, mi, "وضعیت زمانبندی", save_or_edit_menu())
+
+    elif t == "clip_menu":
+        callback_query.author.set_state("INPUT_CLIP_NUMBER")
+        c = db_clips.get_last_clip_id()
+        await bale_bot.send_message(ci, f" شماره حدیث را ارسال کنید اخرین ({c})")

@@ -1,5 +1,22 @@
 from config import *
 
+MESSAGES = {
+    "invalid_number": "❗️ لطفاً فقط عدد مثبت وارد کنید.",
+    "note_exists": "این یادداشت موجود است. می‌خواهید آن را ویرایش کنید؟",
+    "enter_note_text": "متن یادداشت رو بفرستید",
+    "note_saved": "یادداشت با موفقیت ذخیره شد.",
+    "note_not_found": "شماره یادداشت پیدا نشد! دوباره امتحان کن.",
+    "note_does_not_exist": "این یادداشت موجود نیست. ابتدا آن را ایجاد کنید.",
+    "note_sent": "یادداشت ارسال شده است و قابل ویرایش نیست.",
+    "note_edited": "یادداشت ویرایش شد.",
+    "ask_more_text": "متن بیشتری داری؟ لطفا پاسخ بده: بله / خیر",
+    "invalid_answer": "لطفا فقط 'بله' یا 'خیر' جواب بده.",
+    "ask_media": "آیا می‌خواهی همراه یادداشت عکس یا فیلمی ارسال کنی؟ اگر داری ارسال کن، اگر نه بنویس 'ندارم'.",
+    "media_received": "فایل دریافت شد. حالا لطفاً متن یادداشت رو بفرست.",
+    "no_media": "باشه، بدون فایل. حالا لطفاً متن یادداشت رو بفرست.",
+    "invalid_media_response": "لطفاً فایل بفرست یا بنویس 'ندارم'.",
+}
+
 
 def fa_to_en_int(num):
     fa_digits = "۰۱۲۳۴۵۶۷۸۹"
@@ -11,91 +28,120 @@ def fa_to_en_int(num):
         elif ch in en_digits:
             result += ch
         else:
-            continue  # یا raise ValueError برای کاراکترهای نامعتبر
+            continue
     return int(result)
-
-
-# پیام‌های ثابت
-MSG_INVALID_NUMBER = "❗️ لطفاً فقط عدد مثبت وارد کنید."
-MSG_NOTE_EXISTS = "این یادداشت موجود است. می‌خواهید آن را ویرایش کنید؟"
-MSG_ENTER_NOTE_TEXT = "متن یادداشت رو بفرستید"
-MSG_NOTE_SAVED = "یادداشت با موفقیت ذخیره شد."
-MSG_NOTE_NOT_FOUND = "شماره یادداشت پیدا نشد! دوباره امتحان کن."
-MSG_NOTE_DOES_NOT_EXIST = "این یادداشت موجود نیست. ابتدا آن را ایجاد کنید."
-MSG_NOTE_SENT = "یادداشت ارسال شده است و قابل ویرایش نیست."
-MSG_NOTE_EDITED = "یادداشت ویرایش شد."
 
 
 async def first_step_save(message):
     note_number = fa_to_en_int(message.text)
-
     if note_number <= 0:
-        await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
+        await bale_bot.send_message(
+            message.chat.id, MESSAGES["invalid_number"], back_menu()
+        )
         return
 
-    if db_notes.check_is_exist(int(note_number)):
-        # به جای حذف state، مستقیم وارد حالت ویرایش شو
-        user_temp_data[message.author.id] = {"note_edit_number": note_number}
+    if db_notes.check_is_exist(note_number):
+        user_temp_data[message.author.id] = {
+            "note_edit_number": note_number,
+            "text_parts": [],
+        }
         message.author.set_state("INPUT_EDIT_TEXT_NOTE")
         await bale_bot.send_message(
-            message.chat.id, MSG_NOTE_EXISTS + "\n" + MSG_ENTER_NOTE_TEXT, back_menu()
+            message.chat.id,
+            MESSAGES["note_exists"] + "\n" + MESSAGES["enter_note_text"],
+            back_menu(),
         )
-        return
+    else:
+        user_temp_data[message.author.id] = {
+            "note_number": note_number,
+            "text_parts": [],
+        }
+        message.author.set_state("ASK_MEDIA")
+        await bale_bot.send_message(message.chat.id, MESSAGES["ask_media"])
 
-    user_temp_data[message.author.id] = {"note_number": note_number}
-    message.author.set_state("INPUT_TEXT_NOTE")
-    await bale_bot.send_message(message.chat.id, MSG_ENTER_NOTE_TEXT)
 
-
-async def next_step_save(message):
+async def handle_media_step(message):
     user_id = message.author.id
-    note_number = user_temp_data.get(user_id, {}).get("note_number")
+    state = message.author.get_state()
 
-    if not note_number:
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_NOT_FOUND, back_menu())
-        message.author.del_state()
+    if state != "ASK_MEDIA":
         return
 
-    try:
-        db_notes.save_note(note_number, message.text)
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_SAVED, back_menu())
-    except Exception as e:
-        await bale_bot.send_message(message.chat.id, str(e), back_menu())
+    if message.photo:
+        user_temp_data[user_id]["media_type"] = "photo"
+        user_temp_data[user_id]["media_file_id"] = message.photo[-1].id
+        await bale_bot.send_message(message.chat.id, MESSAGES["media_received"])
+        message.author.set_state("INPUT_TEXT_NOTE")
 
-    user_temp_data.pop(user_id, None)
+    elif message.video:
+        user_temp_data[user_id]["media_type"] = "video"
+        user_temp_data[user_id]["media_file_id"] = message.video.id
+        await bale_bot.send_message(message.chat.id, MESSAGES["media_received"])
+        message.author.set_state("INPUT_TEXT_NOTE")
+
+    elif message.text and message.text.strip().lower() == "ندارم":
+        await bale_bot.send_message(message.chat.id, MESSAGES["no_media"])
+        message.author.set_state("INPUT_TEXT_NOTE")
+
+    else:
+        await bale_bot.send_message(message.chat.id, MESSAGES["invalid_media_response"])
 
 
-async def first_state_edit(message):
-    note_number = fa_to_en_int(message.text)
+async def handle_text_parts(message):
+    user_id = message.author.id
+    state = message.author.get_state()
 
-    if note_number <= 0:
-        await bale_bot.send_message(message.chat.id, MSG_INVALID_NUMBER, back_menu())
-        return
-
-    if not db_notes.check_is_exist(int(note_number)):
-        message.author.del_state()
+    if state not in ["INPUT_TEXT_NOTE", "INPUT_EDIT_TEXT_NOTE"]:
         await bale_bot.send_message(
-            message.chat.id, MSG_NOTE_DOES_NOT_EXIST, back_menu()
+            message.chat.id, MESSAGES["invalid_number"], back_menu()
         )
         return
 
-    if db_notes.is_note_sent(note_number):
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_SENT, back_menu())
-        return
+    text = message.text.strip()
 
-    user_temp_data[message.author.id] = {"note_edit_number": note_number}
-    message.author.set_state("INPUT_EDIT_TEXT_NOTE")
-    await bale_bot.send_message(message.chat.id, MSG_ENTER_NOTE_TEXT)
+    user_temp_data[user_id]["text_parts"].append(text)
+    await bale_bot.send_message(message.chat.id, MESSAGES["ask_more_text"])
+    message.author.set_state("CONFIRM_MORE_TEXT")
 
 
-async def next_state_edit(message):
+async def confirm_more_text(message):
     user_id = message.author.id
-    note_id = user_temp_data.get(user_id, {}).get("note_edit_number")
+    answer = message.text.strip().lower()
 
-    try:
-        db_notes.edit_content(note_id, message.text)
-        await bale_bot.send_message(message.chat.id, MSG_NOTE_EDITED, back_menu())
-    except Exception as e:
-        await bale_bot.send_message(message.chat.id, str(e))
+    if answer == "بله":
+        if "note_number" in user_temp_data[user_id]:
+            message.author.set_state("INPUT_TEXT_NOTE")
+        elif "note_edit_number" in user_temp_data[user_id]:
+            message.author.set_state("INPUT_EDIT_TEXT_NOTE")
+        await bale_bot.send_message(message.chat.id, MESSAGES["enter_note_text"])
 
-    user_temp_data.pop(user_id, None)
+    elif answer == "خیر":
+        full_text = "\n".join(user_temp_data[user_id]["text_parts"])
+
+        if "note_number" in user_temp_data[user_id]:
+            note_number = user_temp_data[user_id]["note_number"] or ""
+            file_id = str(user_temp_data[user_id].get("media_file_id", ""))
+            media_type = user_temp_data[user_id].get("media_type", "")
+            try:
+                db_notes.save_note(note_number, full_text, file_id, media_type)
+                await bale_bot.send_message(
+                    message.chat.id, MESSAGES["note_saved"], back_menu()
+                )
+            except Exception as e:
+                await bale_bot.send_message(message.chat.id, str(e), back_menu())
+
+        elif "note_edit_number" in user_temp_data[user_id]:
+            note_number = user_temp_data[user_id]["note_edit_number"]
+            try:
+                db_notes.edit_content(note_number, full_text)
+                await bale_bot.send_message(
+                    message.chat.id, MESSAGES["note_edited"], back_menu()
+                )
+            except Exception as e:
+                await bale_bot.send_message(message.chat.id, str(e), back_menu())
+
+        user_temp_data.pop(user_id, None)
+        message.author.del_state()
+
+    else:
+        await bale_bot.send_message(message.chat.id, MESSAGES["invalid_answer"])

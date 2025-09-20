@@ -55,13 +55,7 @@ admins = [
 # 🧠 پردازش پیام‌ها
 def process_hadith_message(text: str, id: int | str, eitaa=False) -> str:
     if eitaa:
-        return f"""{text} \n\nمعرفی کتاب:
-    https://eitaa.com/tamakkon_ir/19
-
-
-    دانلود کتاب:
-    https://eitaa.com/tamakkon_ir/20
-
+        return f"""{text} \n\n
     #حدیث
     #{id}
     @tamakkon_ir"""
@@ -151,6 +145,7 @@ def save_or_edit_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("یادداشت", "note_menu")],
         [InlineKeyboardButton("کتاب", "book_menu")],
+        [InlineKeyboardButton("کلیپ", "clip_menu")],
         [InlineKeyboardButton("بازگشت", "back_to_message")],
     )
 

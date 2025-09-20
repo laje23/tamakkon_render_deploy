@@ -7,6 +7,7 @@ from utils import (
     get_media_bytes,
     file_id_to_bynery,
     get_mentioning_day,
+    split_text_with_index,
 )
 
 
@@ -21,7 +22,7 @@ async def send_to_debugger(result, success=False):
         try:
             await bale_bot.send_message(target, message)
         except Exception as e:
-            print(f"[Debugger Error] ارسال پیام به دیباگر شکست خورد:\n{e}")
+            pass
 
 
 async def auto_send_hadith():
@@ -30,17 +31,14 @@ async def auto_send_hadith():
         return error_response("هیچ پیامی موجود نیست")
 
     content, id = result
-    if not os.path.exists(hadith_photo_url):
-        return error_response(f"عکس موجود نیست: {hadith_photo_url}")
 
     try:
-        with open(hadith_photo_url, "rb") as photo:
-            await bale_bot.send_photo(
-                bale_channel_id, photo, process_hadith_message(content, id)
-            )
-            await eitaa_bot.send_file(
-                eitaa_channel_id, photo, process_hadith_message(content, id, True)
-            )
+        await bale_bot.send_message(
+            bale_channel_id, process_hadith_message(content, id)
+        )
+        await eitaa_bot.send_message(
+            eitaa_channel_id, process_hadith_message(content, id)
+        )
         db_hadith.mark_sent(id)
         return success_response("حدیث ارسال شد")
     except Exception as e:
@@ -52,12 +50,22 @@ async def auto_send_not():
     if not result:
         return error_response("هیچ پیامی موجود نیست")
 
-    content, id = result
-    text = process_note_message(content, id)
+    content, id, file_id, media_type = result
+    chunk_size = 3500
+    messages = split_text_with_index(content, chunk_size)
 
     try:
-        await bale_bot.send_message(bale_channel_id, text)
-        await eitaa_bot.send_message(eitaa_channel_id, text)
+        if file_id:
+            file = await file_id_to_bynery(file_id, bale_bot)
+            if media_type == "photo":
+                await bale_bot.send_photo(bale_channel_id, file.read(), messages[0])
+                await eitaa_bot.send_file(eitaa_channel_id, file, messages[0])
+                messages.pop(0)
+
+        for text in messages:
+            await bale_bot.send_message(bale_channel_id, process_note_message(text))
+            await eitaa_bot.send_message(eitaa_channel_id, process_note_message(text))
+
         db_notes.mark_sent(id)
         return success_response("یادداشت ارسال شد")
     except Exception as e:
@@ -86,17 +94,6 @@ async def send_message_to_channel(message, bot):
             return success_response("پیام ارسال شد")
         except Exception as e:
             return error_response("خطا در ارسال پیام متنی", e)
-
-
-async def send_text_schaduler(text):
-    try:
-        await asyncio.gather(
-            bale_bot.send_message(bale_channel_id, text),
-            eitaa_bot.send_message(eitaa_channel_id, text),
-        )
-        return success_response("پیام زمان‌بندی‌شده ارسال شد")
-    except Exception as e:
-        return error_response("خطا در ارسال پیام زمان‌بندی‌شده", e)
 
 
 async def send_day_info():
@@ -211,7 +208,6 @@ async def send_prayer(prayer_type: Literal["faraj", "ahd", "salavat", "tohid"]):
 
     except Exception as e:
         result = error_response(f"خطا در ارسال دعای {prayer_type}", e)
-        print("[Prayer Error]", json.dumps(result, ensure_ascii=False, indent=2))
         await send_to_debugger(result)
         return result
 

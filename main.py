@@ -36,18 +36,29 @@ async def first_state_save_note(message):
 
 @bale_bot.on_message(at_state("INPUT_TEXT_NOTE"))
 async def next_state_save_note(message):
-    await next_step_save(message)
+    await handle_text_parts(message)  # تغییر داده شد به handle_text_parts
 
 
 # ✏️ ویرایش یادداشت
 @bale_bot.on_message(at_state("INPUT_EDIT_NUMBER_NOTE"))
 async def first_state_edit_note(message):
-    await first_state_edit(message)
+    await first_step_save(message)  # اگر تابع مشابه first_step_save است
 
 
 @bale_bot.on_message(at_state("INPUT_EDIT_TEXT_NOTE"))
 async def next_state_edit_note(message):
-    await next_state_edit(message)
+    await handle_text_parts(message)  # مجدداً همان تابع handle_text_parts
+
+
+@bale_bot.on_message(at_state("CONFIRM_MORE_TEXT"))
+async def confirm_more_text_handler(message):
+    await confirm_more_text(message)
+
+
+# 📎 دریافت فایل یا پاسخ 'ندارم' قبل از گرفتن متن یادداشت
+@bale_bot.on_message(at_state("ASK_MEDIA"))
+async def handle_media_state(message):
+    await handle_media_step(message)
 
 
 # 📢 ارسال پیام به کانال
@@ -104,20 +115,32 @@ async def handle_book_excerpt_edit(message):
     await input_new_excerpt(message)
 
 
+@bale_bot.on_message(at_state("INPUT_CLIP_NUMBER"))
+async def _(message):
+    await handle_clip_number(message)
+
+
+@bale_bot.on_message(at_state("INPUT_NEW_CLIP"))
+async def _(message):
+    await handle_new_clip(message)
+
+
+@bale_bot.on_message(at_state("INPUT_CLIP_CAPTION"))
+async def _(message):
+    await handle_clip_caption(message)
+
+
+@bale_bot.on_message(at_state("EDIT_CLIP_CAPTION"))
+async def _(message):
+    await handle_edit_caption(message)
+
+
 # 📥 دریافت پیام‌های گروهی
 @bale_bot.on_message(group)
 async def collect_group_input(message):
     try:
         if message.chat.id == group_reserch_hadith_id:
             db_hadith.save_id_and_content(message.id, message.text)
-
-        elif message.chat.id == group_reserch_clip_id and message.video:
-            if message.video:
-                db_clips.save_clip(message.video.id, message.caption)
-            else:
-                await send_to_debugger(
-                    error_response("پیام ارسال شده در گروه کلیپ فرمتی نامعتبر دارد")
-                )
 
         elif message.chat.id == group_reserch_lecture_id:
             if message.document:

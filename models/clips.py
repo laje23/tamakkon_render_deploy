@@ -37,6 +37,12 @@ class ClipsTable:
             (file_id, caption, min_sent),
         )
 
+    def edit_caption(self, clip_id: int, new_caption: str):
+        self.cursor.execute(
+            "UPDATE clips SET caption = %s WHERE id = %s",
+            (new_caption, clip_id),
+        )
+
     def select_auto_file_id(self):
         self.cursor.execute(
             """
@@ -49,26 +55,36 @@ class ClipsTable:
         result = self.cursor.fetchone()
         return result if result else None
 
-    def increment_sent(self, id):
+    def increment_sent(self, clip_id):
         self.cursor.execute(
             "UPDATE clips SET sent = sent + 1 WHERE id = %s",
-            (id,),
+            (clip_id,),
         )
 
-    # تابع آمار تعداد ارسال شده و ارسال نشده
     def get_sent_unsent_counts(self):
-        # کلیپ‌هایی که sent = 0 (ارسال نشده)
         self.cursor.execute("SELECT COUNT(*) FROM clips WHERE sent = 0")
         unsent_count = self.cursor.fetchone()[0]
 
-        # کلیپ‌هایی که sent > 0 (ارسال شده حداقل یک بار)
         self.cursor.execute("SELECT COUNT(*) FROM clips WHERE sent > 0")
         sent_count = self.cursor.fetchone()[0]
 
         return {"sent": sent_count, "unsent": unsent_count}
 
+    def _is_clip_sent(self, clip_id: int) -> bool:
+        self.cursor.execute("SELECT sent FROM clips WHERE id = %s", (clip_id,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0] > 0
+        return False
 
-# توابع بیرون کلاس برای استفاده راحت‌تر
+    def clip_exists(self, clip_id: int) -> bool:
+        self.cursor.execute("SELECT 1 FROM clips WHERE id = %s", (clip_id,))
+        return self.cursor.fetchone() is not None
+
+    def get_last_clip_id(self) -> int | None:
+        self.cursor.execute("SELECT MAX(id) FROM clips")
+        result = self.cursor.fetchone()
+        return result[0] if result and result[0] is not None else None
 
 
 def create_table():
@@ -94,3 +110,23 @@ def auto_return_file_id():
 def get_status():
     with ClipsTable() as db:
         return db.get_sent_unsent_counts()
+
+
+def check_clip_exists(clip_id: int) -> bool:
+    with ClipsTable() as db:
+        return db.clip_exists(clip_id)
+
+
+def get_last_clip_id() -> int | None:
+    with ClipsTable() as db:
+        return db.get_last_clip_id()
+
+
+def edit_clip_caption(clip_id: int, new_caption: str):
+    with ClipsTable() as db:
+        db.edit_caption(clip_id, new_caption)
+
+
+def is_clip_sent(clip_id: int) -> bool:
+    with ClipsTable() as db:
+        return db._is_clip_sent(clip_id)

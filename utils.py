@@ -23,7 +23,7 @@ async def get_media_bytes(message, bot) -> bytes | None:
     if file_id is None:
         return False
 
-    bio = file_id_to_bynery(file_id, bot)
+    bio = await file_id_to_bynery(file_id, bot)
     bin_file = bio.read()
     return bin_file, type_file
 
@@ -137,3 +137,13 @@ def set_schaduler_state(value: bool):
     data["schaduler_state"] = value
     with open(STATE_FILE, "w") as f:
         json.dump(data, f, indent=4)
+
+
+def split_text_with_index(text, chunk_size):
+    chunks = [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
+    total = len(chunks)
+    formatted_chunks = []
+    for i, chunk in enumerate(chunks, 1):
+        header = f"{i} از {total}\n"
+        formatted_chunks.append(header + chunk)
+    return formatted_chunks

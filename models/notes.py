@@ -20,15 +20,17 @@ class NoteTableManager:
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY,
                 content TEXT DEFAULT NULL,
-                sent INTEGER DEFAULT 0 CHECK (sent IN (0,1))
+                sent INTEGER DEFAULT 0 CHECK (sent IN (0,1)),
+                file_id TEXT DEFAULT NULL,
+                media_type text DEFAULT NULL
             );
-        """
+            """
         )
 
-    def insert_note(self, note_id, content):
+    def insert_note(self, note_id, content, file_id, media_type):
         self.cursor.execute(
-            "INSERT INTO notes (id, content) VALUES (%s, %s)",
-            (note_id, content),
+            "INSERT INTO notes (id, content , file_id , media_type) VALUES (%s, %s,%s,%s)",
+            (note_id, content, file_id, media_type),
         )
 
     def note_exists(self, note_id):
@@ -40,7 +42,7 @@ class NoteTableManager:
 
     def get_unsent_note(self):
         self.cursor.execute(
-            "SELECT content, id FROM notes WHERE sent = 0 ORDER BY id LIMIT 1"
+            "SELECT content, id , file_id ,media_type FROM notes WHERE sent = 0 ORDER BY id LIMIT 1"
         )
         return self.cursor.fetchone()
 
@@ -88,9 +90,9 @@ def create_table():
         db.create_table()
 
 
-def save_note(note_id, content):
+def save_note(note_id, content, file_id="", media_type=""):
     with NoteTableManager() as db:
-        db.insert_note(note_id, content)
+        db.insert_note(note_id, content, file_id, media_type)
 
 
 def check_is_exist(note_id):
