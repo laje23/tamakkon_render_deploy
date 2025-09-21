@@ -142,3 +142,4 @@ async def call_handler(callback_query):
     elif t == "clip_menu":
         callback_query.author.set_state("INPUT_CLIP_NUMBER")
         c = db_clips.get_last_clip_id()
+        await bale_bot.edit_message_text(ci, mi, "کلیپ رو ارسال کنید", back_menu())

@@ -8,6 +8,7 @@ from utils import (
     file_id_to_bynery,
     get_mentioning_day,
     split_text_with_index,
+    prepare_processed_messages,
 )
 
 
@@ -46,38 +47,37 @@ async def auto_send_hadith():
 
 
 async def auto_send_not():
-    result = db_notes.auto_return_content()
+    result = db_notes.get_unsent_note()
     if not result:
         return error_response("هیچ پیامی موجود نیست")
 
-    content, id, file_id, media_type = result
-    chunk_size = 3500
-    messages = split_text_with_index(content, chunk_size)
+    text_id, file_id, media_type = result
+    parts = db_notes.get_parts(text_id)
+    if not parts:
+        return error_response("هیچ بخشی از متن موجود نیست")
+
+    # اینجا دیگه متن‌ها آماده نهایی ساخته می‌شن
+    messages = prepare_processed_messages(parts, text_id)
 
     try:
-        if file_id:
+        if file_id and media_type :
             file = await file_id_to_bynery(file_id, bale_bot)
+
             if media_type == "photo":
-                await bale_bot.send_photo(
-                    bale_channel_id, file.read(), process_note_message(messages[0], id)
-                )
-            if media_type == "video":
-                await bale_bot.send_video(
-                    bale_channel_id, file.read(), process_note_message(messages[0], id)
-                )
-            await eitaa_bot.send_file(
-                eitaa_channel_id, file, process_note_message(messages[0], id)
-            )
+                await bale_bot.send_photo(bale_channel_id, file.read(), messages[0])
+            elif media_type == "video":
+                await bale_bot.send_video(bale_channel_id, file.read(), messages[0])
+
+            await eitaa_bot.send_file(eitaa_channel_id, file, messages[0])
             messages.pop(0)
 
-        for text in messages:
-            await bale_bot.send_message(bale_channel_id, process_note_message(text, id))
-            await eitaa_bot.send_message(
-                eitaa_channel_id, process_note_message(text, id)
-            )
+        for msg in messages:
+            await bale_bot.send_message(bale_channel_id, msg)
+            await eitaa_bot.send_message(eitaa_channel_id, msg)
 
-        db_notes.mark_sent(id)
+        db_notes.mark_sent(text_id)
         return success_response("یادداشت ارسال شد")
+
     except Exception as e:
         return error_response("ارور در ارسال یادداشت", e)
 

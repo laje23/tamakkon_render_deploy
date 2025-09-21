@@ -3,7 +3,7 @@ import traceback
 from datetime import datetime
 import jdatetime
 import io
-from config import base_mentioning_image_url
+from config import base_mentioning_image_url, process_note_message
 
 
 async def get_media_bytes(message, bot) -> bytes | None:
@@ -147,3 +147,37 @@ def split_text_with_index(text, chunk_size):
         header = f"{i} از {total}\n"
         formatted_chunks.append(header + chunk)
     return formatted_chunks
+
+
+def fa_to_en_int(num):
+    fa_digits = "۰۱۲۳۴۵۶۷۸۹"
+    en_digits = "0123456789"
+    result = ""
+    for ch in str(num):
+        if ch in fa_digits:
+            result += en_digits[fa_digits.index(ch)]
+        elif ch in en_digits:
+            result += ch
+        else:
+            continue
+    return int(result)
+
+
+def prepare_processed_messages(parts, text_id):
+    # مرتب کردن بخش‌ها بر اساس part_index
+    parts_sorted = sorted(parts, key=lambda x: x[0])
+
+    total = len(parts_sorted)
+    messages = []
+
+    for i, (_, content) in enumerate(parts_sorted, start=1):
+        # اضافه کردن شماره بخش
+        numbered_text = f"{i}/{total} \n {content}"
+
+        # پردازش متن
+        processed = process_note_message(numbered_text, text_id)
+
+        # ذخیره در لیست
+        messages.append(processed)
+
+    return messages
