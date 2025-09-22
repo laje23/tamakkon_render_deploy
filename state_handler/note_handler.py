@@ -19,7 +19,6 @@ MESSAGES = {
 }
 
 
-
 async def first_step_save(message):
     note_number = fa_to_en_int(message.text)
     if note_number <= 0:
@@ -37,13 +36,13 @@ async def first_step_save(message):
         return
 
     # ایجاد رکورد مادر (با مقادیر اولیه خالی برای محتوا)
-    db_notes.save_note(note_number,"", "")
+    db_notes.save_note(note_number, "", "")
 
     user_temp_data[message.author.id] = {
         "note_number": note_number,
         "media_type": None,
         "media_file_id": None,
-        "part_index": 0  
+        "part_index": 0,
     }
 
     message.author.set_state("ASK_MEDIA")

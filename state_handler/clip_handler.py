@@ -15,8 +15,6 @@ MESSAGES = {
 }
 
 
-
-
 # مرحله دوم - دریافت کلیپ
 async def handle_new_clip(message):
     user_id = message.author.id

@@ -28,6 +28,7 @@ group_reserch_lecture_id = int(os.getenv("RESERCH_LECTURE_ID"))
 
 bale_channel_id = int(os.getenv("CHANNEL_BALE"))
 eitaa_channel_id = int(os.getenv("CHANNEL_EITAA"))
+eitaa_channel_id_test = int(os.getenv("CHANNEL_EITAA_TEST"))
 
 
 base_image_url = os.getenv("BASE_IMAGE_URL")

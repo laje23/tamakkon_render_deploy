@@ -60,7 +60,7 @@ async def auto_send_not():
     messages = prepare_processed_messages(parts, text_id)
 
     try:
-        if file_id and media_type :
+        if file_id and media_type:
             file = await file_id_to_bynery(file_id, bale_bot)
 
             if media_type == "photo":

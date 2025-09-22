@@ -69,7 +69,6 @@ class NoteTableManager:
 
         return {"sent": sent, "unsent": unsent}
 
-
     def update_media(self, text_id, file_id=None, media_type=None):
         self.cursor.execute(
             """
@@ -79,7 +78,6 @@ class NoteTableManager:
             """,
             (file_id, media_type, text_id),
         )
-
 
 
 class TextPartManager:
@@ -202,10 +200,12 @@ def get_status():
     with NoteTableManager() as db:
         return db.get_sent_stats()
 
+
 def edit_media(text_id, file_id=None, media_type=None):
     with NoteTableManager() as db:
         db.update_media(text_id, file_id, media_type)
 
+
 def get_unsent_note():
-    with NoteTableManager() as db :
+    with NoteTableManager() as db:
         return db._get_unsent_note()
