@@ -55,16 +55,16 @@ admins = [
 # 🧠 پردازش پیام‌ها
 def process_hadith_message(text: str, id: int | str, eitaa=False) -> str:
     if eitaa:
-        return f"""{text} \n\n
-    #حدیث
-    #{id}
-    @tamakkon_ir"""
+        return f"""{text}\n\n
+#حدیث
+#{id}
+@tamakkon_ir"""
 
     else:
         return f"""{text}\n\n
-    #حدیث
-    #{id}
-    @tamakkon_ir"""
+#حدیث
+#{id}
+@tamakkon_ir"""
 
 
 def process_note_message(text: str, id: int | str) -> str:
