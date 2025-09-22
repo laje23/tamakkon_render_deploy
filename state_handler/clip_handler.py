@@ -15,36 +15,12 @@ MESSAGES = {
 }
 
 
-# مرحله اول - ورود عدد کلیپ
-async def handle_clip_number(message):
-    user_id = message.author.id
-    text = message.text.strip()
-    if not text.isdigit():
-        await bale_bot.send_message(
-            message.chat.id, MESSAGES["only_number"], back_menu()
-        )
-        return
-
-    id = int(text)
-
-    if db_clips.check_clip_exists(id):
-            await bale_bot.send_message(
-                message.chat.id, MESSAGES["clip_already_sent"], back_menu()
-            )
-            message.author.del_state()
-            return 
-        
-
-    else:
-        # وارد حالت ثبت کلیپ جدید شو
-        user_temp_data[user_id] = {"new_id": id}
-        message.author.set_state("INPUT_NEW_CLIP")
-        await bale_bot.send_message(message.chat.id, MESSAGES["send_clip"])
 
 
 # مرحله دوم - دریافت کلیپ
 async def handle_new_clip(message):
     user_id = message.author.id
+    user_temp_data[user_id] = {}
 
     if message.video:
         clip_file_id = message.video.id
@@ -60,7 +36,6 @@ async def handle_new_clip(message):
 # مرحله سوم - دریافت کپشن و ذخیره نهایی کلیپ جدید
 async def handle_clip_caption(message):
     user_id = message.author.id
-    id = user_temp_data[user_id].get("new_id")
     file_id = user_temp_data[user_id].get("clip_file_id")
     caption = message.text.strip()
 

@@ -115,10 +115,6 @@ async def handle_book_excerpt_edit(message):
     await input_new_excerpt(message)
 
 
-@bale_bot.on_message(at_state("INPUT_CLIP_NUMBER"))
-async def _(message):
-    await handle_clip_number(message)
-
 
 @bale_bot.on_message(at_state("INPUT_NEW_CLIP"))
 async def _(message):
