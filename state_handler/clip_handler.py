@@ -28,18 +28,13 @@ async def handle_clip_number(message):
     id = int(text)
 
     if db_clips.check_clip_exists(id):
-        # کلیپ وجود دارد، بررسی ارسال شدن
-        if db_clips.is_clip_sent(id):
             await bale_bot.send_message(
                 message.chat.id, MESSAGES["clip_already_sent"], back_menu()
             )
             message.author.del_state()
-            return
+            return 
+        
 
-        # وارد حالت ویرایش کپشن شو
-        user_temp_data[user_id] = {"edit_id": id}
-        message.author.set_state("EDIT_CLIP_CAPTION")
-        await bale_bot.send_message(message.chat.id, MESSAGES["enter_new_caption"])
     else:
         # وارد حالت ثبت کلیپ جدید شو
         user_temp_data[user_id] = {"new_id": id}
