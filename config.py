@@ -55,13 +55,15 @@ admins = [
 # 🧠 پردازش پیام‌ها
 def process_hadith_message(text: str, id: int | str, eitaa=False) -> str:
     if eitaa:
-        return f"""{text}\n\n
+        return f"""📗 حدیث امروز 
+{text}\n
 #حدیث
 #{id}
 @tamakkon_ir"""
 
     else:
-        return f"""{text}\n\n
+        return f"""📗 حدیث امروز
+{text}\n
 #حدیث
 #{id}
 @tamakkon_ir"""
