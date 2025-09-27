@@ -145,8 +145,7 @@ async def send_auto_book():
         if not book:
             return error_response("کتاب جدیدی برای ارسال وجود ندارد")
 
-        text = f"""
-📖  معرفی کتاب روز
+        text = f"""📖  معرفی کتاب روز
 
 عنوان: {book['title']}
 نویسنده: {book['author']}
@@ -159,8 +158,7 @@ async def send_auto_book():
 🌹 اللهم عجل لولیک الفرج 🌹
 
 #معرفی_کتاب
-@tamakkon_ir
-"""
+@tamakkon_ir"""
         await asyncio.gather(
             bale_bot.send_message(bale_channel_id, text),
             eitaa_bot.send_message(eitaa_channel_id, text),
@@ -212,7 +210,7 @@ async def send_prayer(prayer_type: Literal["faraj", "ahd", "salavat", "tohid"]):
             )
 
         result = success_response(f"دعای {prayer_type} ارسال شد")
-        await send_to_debugger(result, success=True)
+        await send_to_debugger(result)
         return result
 
     except Exception as e:

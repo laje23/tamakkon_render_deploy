@@ -177,14 +177,6 @@ def back_menu():
     return InlineKeyboard([InlineKeyboardButton("بازگشت", "back_to_message")])
 
 
-tohid_reminders = {
-    "06:00": """صبح‌تون نورانی به ذکر خدا 🌅
-روز رو با تلاوت سوره مبارکه توحید شروع کنیم.
-«قُلْ هُوَ اللّهُ أَحَد» 🌸
-
-#یادآور_بندگی
-@tamakkon_ir""",
-}
 
 prayers = {
     "faraj": {
@@ -216,7 +208,7 @@ prayers = {
 
 #یادآور_خادمی
 @tamakkon_ir""",
-        "local": True,
+        "local":True,
     },
     "tohid": {
         "url": tohid_audio_url,
@@ -237,7 +229,8 @@ prayers = {
 
 
 #یادآور_بندگی
-@tamakkon_ir"""
+@tamakkon_ir
 ''',
+        "local":True,
     },
 }
