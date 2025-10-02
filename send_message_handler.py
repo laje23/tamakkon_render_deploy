@@ -172,51 +172,21 @@ async def send_auto_book():
 import asyncio
 
 
-async def send_prayer(prayer_type: Literal["faraj", "ahd", "salavat", "tohid"]):
-    try:
-        prayer = prayers.get(prayer_type)
-        if not prayer:
-            result = error_response(
-                "نوع دعای وارد شده معتبر نیست. از 'faraj'، 'ahd' یا 'salavat'  یا 'tohid 'استفاده کنید."
-            )
-            await send_to_debugger(result)
-            return result
+async def send_prayer(prayer_type: Literal["faraj", "ahd", "tohid"]):
+    dict_pr = {"faraj": 1, "ahd": 2, "tohid": 3}
+    id_key = dict_pr[prayer_type]
+    resault = db_audios.get_file_id_and_caption_by_id(id_key)
+    if not resault:
+        post = error_response("ارور در دریافت ایدی صوت از دیتابیس")
+        await send_to_debugger(post)
+        return
+    file_id, caption = resault
+    bin_file = await file_id_to_bynery(file_id, bale_bot)
 
-        if prayer["local"]:
-            if not os.path.exists(prayer["url"]):
-                result = error_response(f"فایل صوتی وجود ندارد: {prayer['url']}")
-                await send_to_debugger(result)
-                return result
-
-            with open(prayer["url"], "rb") as audio_file:
-                audio_data = audio_file.read()
-
-            await asyncio.gather(
-                bale_bot.send_audio(
-                    bale_channel_id, audio_data, caption=prayer["caption"]
-                ),
-                eitaa_bot.send_file(
-                    eitaa_channel_id, audio_data, caption=prayer["caption"]
-                ),
-            )
-        else:
-            await asyncio.gather(
-                bale_bot.send_audio(
-                    bale_channel_id, prayer["url"], caption=prayer["caption"]
-                ),
-                eitaa_bot.send_file(
-                    eitaa_channel_id, prayer["url"], caption=prayer["caption"]
-                ),
-            )
-
-        result = success_response(f"دعای {prayer_type} ارسال شد")
-        await send_to_debugger(result)
-        return result
-
-    except Exception as e:
-        result = error_response(f"خطا در ارسال دعای {prayer_type}", e)
-        await send_to_debugger(result)
-        return result
+    await asyncio.gather(
+        bale_bot.send_audio(bale_channel_id, bin_file.read(), caption),
+        eitaa_bot.send_file(eitaa_channel_id, bin_file, caption),
+    )
 
 
 async def send_auto_lecture():

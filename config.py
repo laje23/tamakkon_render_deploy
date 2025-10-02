@@ -5,6 +5,7 @@ from models import hadith as db_hadith
 from models import notes as db_notes
 from models import clips as db_clips
 from models import books as db_books
+from models import audio as db_audios
 from models import lecture as db_lecture
 import asyncio
 import threading
@@ -33,16 +34,9 @@ eitaa_channel_id_test = int(os.getenv("CHANNEL_EITAA_TEST"))
 
 base_image_url = os.getenv("BASE_IMAGE_URL")
 base_mentioning_image_url = os.getenv("BASE_DAY_URL")
-base_audio_url = os.getenv("BASE_AUDIO_URL")
 
 
 hadith_photo_url = base_image_url + "hadith.jpg"
-
-
-tohid_audio_url = base_audio_url + "Tohid.mp3"
-prayer_salavaat_url = base_audio_url + "Salavaat.mp3"
-Prayer_faraj_url = base_audio_url + "Faraj.mp3"
-Prayer_ahd_url = base_audio_url + "Ahd.mp3"
 
 
 admins = [
@@ -105,10 +99,30 @@ def message_menu():
     return InlineKeyboard(
         [InlineKeyboardButton("ارسال ها", "send_menu")],
         [InlineKeyboardButton("ذخیره و ویرایش", "add_and_edit")],
+        [InlineKeyboardButton("صوت های ارسالی", "change_audio_file_id")],
         [InlineKeyboardButton("گرفتن آمار", "get_status")],
         [InlineKeyboardButton("زمانبندی", "schaduler_menu")],
         [InlineKeyboardButton("بازگشت", "back_to_main")],
     )
+
+
+def audios_menu():
+    rows = db_audios.get_all_audios()
+    keyboards = []
+    if rows:
+
+        for row in rows:
+            id, file_name, file_id, caption = row
+            button = InlineKeyboardButton(str(file_name), f"audio:{id}")
+            keyboards.append([button])
+        keyboards.append([InlineKeyboardButton("بازگشت", "back_to_message")])
+    else:
+        button = InlineKeyboardButton(
+            "جدول خالیست ایجاد مقادیر اولیه ", "create_default_audios_row"
+        )
+        keyboards.append([button])
+        keyboards.append([InlineKeyboardButton("بازگشت", "back_to_message")])
+    return InlineKeyboard(*keyboards)
 
 
 def note_menu():
@@ -175,62 +189,3 @@ def edit_note_menu():
 
 def back_menu():
     return InlineKeyboard([InlineKeyboardButton("بازگشت", "back_to_message")])
-
-
-
-prayers = {
-    "faraj": {
-        "url": Prayer_faraj_url,
-        "caption": """🌸 دعای فرج
-
-با دعای فرج، دل‌ها آرام و جان‌ها سرشار از امید می‌شود.
-فراموش نکنیم امروز نیز با این دعا، ظهور مولایمان حضرت ولی‌عصر (عج) را طلب کنیم. 🌹
-
-#یادآور_فرج
-@tamakkon_ir""",
-        "local": True,
-    },
-    "ahd": {
-        "url": Prayer_ahd_url,
-        "caption": """🌅 دعای عهد
-
-با دعای عهد، پیمان قلبی‌مان با امام زمان (عج) را تازه می‌کنیم.
-هر صبح با این دعا، امید و عهدی نو در دل‌ها زنده می‌شود. 💫
-
-#دعای_عهد
-@tamakkon_ir""",
-        "local": True,
-    },
-    "salavat": {
-        "url": prayer_salavaat_url,
-        "caption": """✨ بیاید با صلوات خاص امام رضا (ع) دل‌هامون رو روشن کنیم 🌟
-اللهم صلّ علی علی بن موسی الرضا 🌹
-
-#یادآور_خادمی
-@tamakkon_ir""",
-        "local":True,
-    },
-    "tohid": {
-        "url": tohid_audio_url,
-        "caption": '''🕋 بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِیمِ 🕋
-
-قُلْ هُوَ اللَّهُ أَحَدٌ
-اللَّهُ الصَّمَدُ
-لَمْ یَلِدْ وَلَمْ یُولَدْ
-وَلَمْ یَکُنْ لَهُ کُفُوًا أَحَدٌ
-
-📖 سوره مبارکه اخلاص (توحید) | جزء ۳۰
-
-✨ فضیلت و ثواب:
-از پیامبر اکرم (ص) روایت شده:
-«آیا کسی از شما نمی‌تواند در یک شب هزار ثواب به دست آورد؟»
-سپس فرمود: «کسی که سوره قل هو الله احد را صد بار بخواند، هزار ثواب برای او نوشته می‌شود.»
-این سوره معادل یک‌سوم قرآن کریم است.
-
-
-#یادآور_بندگی
-@tamakkon_ir
-''',
-        "local":True,
-    },
-}

@@ -22,7 +22,7 @@ async def get_media_bytes(message, bot) -> bytes | None:
 
     if file_id is None:
         return False
-    
+
     bio = await file_id_to_bynery(file_id, bot)
     bin_file = bio.read()
     return bin_file, type_file
@@ -181,4 +181,3 @@ def prepare_processed_messages(parts, text_id):
         messages.append(processed)
 
     return messages
-

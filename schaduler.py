@@ -9,7 +9,7 @@ from send_message_handler import (
     send_auto_clip,
     send_auto_book,
     auto_send_not,
-    send_auto_lecture,  # فرض می‌گیریم اینو خودت می‌سازی یا ساخته‌ای
+    send_auto_lecture,  
     send_to_debugger,
 )
 

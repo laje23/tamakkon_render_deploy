@@ -130,6 +130,11 @@ async def _(message):
     await handle_edit_caption(message)
 
 
+@bale_bot.on_message(at_state("INPUT_AUDIO_FILE"))
+async def _(message):
+    await save_new_audio(message)
+
+
 # 📥 دریافت پیام‌های گروهی
 @bale_bot.on_message(group)
 async def collect_group_input(message):
