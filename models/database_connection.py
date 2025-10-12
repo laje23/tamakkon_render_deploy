@@ -1,7 +1,6 @@
 # db.py
 import psycopg2
 import os
-from dotenv import load_dotenv
 
 
 def get_connection():
@@ -16,3 +15,4 @@ def get_connection():
     except psycopg2.Error as e:
         print("connection to db fail : ", e)
         return None
+

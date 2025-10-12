@@ -27,8 +27,8 @@ async def scheduled_messages():
                     if current_time == "06:00":
                         await send_prayer("ahd")
 
-                    elif current_time == "07:47":
-                        await send_day_info()
+                    # elif current_time == "07:47":
+                    #     await send_day_info()
 
                     elif current_time == "09:34":
                         await auto_send_hadith()
